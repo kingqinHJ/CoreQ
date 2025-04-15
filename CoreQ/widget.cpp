@@ -52,6 +52,7 @@ void Widget::createPages()
     stackedWidget->addWidget(promisePage);
     // 添加HTTP示例页面
     stackedWidget->addWidget(httpPage);
+
 }
 
 void Widget::initConnections()

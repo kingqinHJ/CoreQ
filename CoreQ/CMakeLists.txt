@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 启用自动资源编译（推荐）
 set(CMAKE_AUTORCC ON)
 
+find_package(spdlog CONFIG REQUIRED)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
@@ -47,7 +48,7 @@ else()
             qsetting.h qsetting.cpp
             qpromise.cpp qpromise.h
             mysrc.qrc
-
+            vcpkg.json
         )
     endif()
 endif()
@@ -55,6 +56,7 @@ endif()
 target_link_libraries(CoreQ PRIVATE 
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+    spdlog::spdlog
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
