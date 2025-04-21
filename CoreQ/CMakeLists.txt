@@ -49,6 +49,8 @@ else()
             qpromise.cpp qpromise.h
             mysrc.qrc
             vcpkg.json
+            callbackdemowidget.h callbackdemowidget.cpp
+            PageFactory.h
         )
     endif()
 endif()

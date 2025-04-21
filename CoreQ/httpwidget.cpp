@@ -5,7 +5,7 @@ HttpWidget::HttpWidget(QWidget *parent)
     , httpManager(new HttpManager(this))
     , getUrlEdit(new QLineEdit(this))
     , postUrlEdit(new QLineEdit(this))
-    , formUrlEdit(new QLineEdit(this))
+//    , formUrlEdit(new QLineEdit(this))
     , getBtn(new QPushButton("GET请求", this))
     , postBtn(new QPushButton("POST请求", this))
     , formBtn(new QPushButton("表单测试", this))
@@ -25,7 +25,7 @@ void HttpWidget::setupUI()
     getUrlEdit->setText("http://httpbin.org/get?name=gongjianbo&age=27");
     postUrlEdit->setPlaceholderText("输入POST请求URL地址");
     postUrlEdit->setText("Mr QIN ");
-    formUrlEdit->setPlaceholderText("输入表单测试URL地址");
+    //formUrlEdit->setPlaceholderText("输入表单测试URL地址");
     
     // 设置文本编辑框为只读
     getResultEdit->setReadOnly(true);

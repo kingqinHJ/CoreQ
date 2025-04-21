@@ -1,5 +1,6 @@
 #include "widget.h"
 #include "./ui_widget.h"
+#include "PageFactory.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -7,9 +8,6 @@ Widget::Widget(QWidget *parent)
     , navigationList(new QListWidget(this))
     , stackedWidget(new QStackedWidget(this))
     , mainLayout(new QHBoxLayout(this))
-    , settingPage(new QSetting(this))
-    , promisePage(new QPromise(this))
-    , httpPage(new HttpWidget(this))
 {
     ui->setupUi(this);
     setupUI();
@@ -25,7 +23,8 @@ Widget::~Widget()
 void Widget::setupUI()
 {
     // 设置窗口标题和大小
-    setWindowTitle("Qt组件库");
+//    setWindowTitle("Qt组件库");
+    setWindowTitle("Qt component");
     resize(1200, 800);
 
     // 设置导航列表的样式和固定宽度
@@ -33,6 +32,7 @@ void Widget::setupUI()
     navigationList->addItem("QSettings");
     navigationList->addItem("Promise示例");
     navigationList->addItem("HTTP示例");
+    navigationList->addItem("callback");
     // TODO: 添加更多功能项
     
     // 设置主布局
@@ -46,12 +46,14 @@ void Widget::setupUI()
 
 void Widget::createPages()
 {
-    // 添加QSettings页面
-    stackedWidget->addWidget(settingPage);
-    // 添加Promise示例页面
-    stackedWidget->addWidget(promisePage);
-    // 添加HTTP示例页面
-    stackedWidget->addWidget(httpPage);
+    QStringList pageTypes = {"Settings", "Promise", "Http","Callback"};
+    for (const QString &type : pageTypes) {
+        QWidget *page = PageFactory::CreateWidget(type, this);
+        if (page) {
+            mpages[type] = page;
+            stackedWidget->addWidget(page);
+        }
+    }
 
 }
 
