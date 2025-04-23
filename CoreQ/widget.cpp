@@ -33,6 +33,7 @@ void Widget::setupUI()
     navigationList->addItem("Promise示例");
     navigationList->addItem("HTTP示例");
     navigationList->addItem("callback");
+    navigationList->addItem("JSON操作");
     // TODO: 添加更多功能项
     
     // 设置主布局
@@ -46,7 +47,7 @@ void Widget::setupUI()
 
 void Widget::createPages()
 {
-    QStringList pageTypes = {"Settings", "Promise", "Http","Callback"};
+    QStringList pageTypes = {"Settings", "Promise", "Http", "Callback", "Json"};
     for (const QString &type : pageTypes) {
         QWidget *page = PageFactory::CreateWidget(type, this);
         if (page) {
@@ -54,7 +55,9 @@ void Widget::createPages()
             stackedWidget->addWidget(page);
         }
     }
-
+    
+    // 设置初始页面为JSON页面
+    navigationList->setCurrentRow(4);
 }
 
 void Widget::initConnections()

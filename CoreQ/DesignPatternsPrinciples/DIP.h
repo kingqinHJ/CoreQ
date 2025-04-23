@@ -1,6 +1,8 @@
 #ifndef DIP_H
 #define DIP_H
 
+
+//https://medium.com/@oleksandra_shershen/solid-principles-implementation-and-examples-in-c-99f0d7e3e868
 //定义：高层模块不应该依赖低层模块，两者都应该依赖抽象。抽象不应该依赖细节，细节应该依赖抽象。
 
 //好处：降低模块间的耦合度，提高代码的灵活性和可测试性。

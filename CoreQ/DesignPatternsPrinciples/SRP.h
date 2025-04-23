@@ -1,6 +1,8 @@
 #include<iostream>
 using namespace  std;
 
+
+//https://medium.com/@oleksandra_shershen/solid-principles-implementation-and-examples-in-c-99f0d7e3e868
 //解释：一个类只负责一个职责，变化原因单一。
 //良好设计：将客户信息和账单计算分开，
 class Customer {

@@ -5,6 +5,7 @@
 #include "qpromise.h"
 #include "httpwidget.h"
 #include "callbackdemowidget.h"
+#include "jsonwidget.h"
 
 class PageFactory{
 public:
@@ -14,6 +15,7 @@ public:
         if (type == "Promise") return new QPromise(parent);
         if (type == "Http") return new HttpWidget(parent);
         if (type == "Callback") return new CallbackDemoWidget(parent);
+        if (type == "Json") return new JsonWidget(parent);
         return nullptr;
     }
 };

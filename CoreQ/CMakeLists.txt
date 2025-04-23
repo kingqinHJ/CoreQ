@@ -26,7 +26,8 @@ set(PROJECT_SOURCES
         httpwidget.cpp
 )
 						  
-add_subdirectory(DesignPrinciples)
+add_subdirectory(DesignPatternsPrinciples)
+add_subdirectory(DataProcess)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(CoreQ
@@ -63,11 +64,12 @@ target_link_libraries(CoreQ PRIVATE
     spdlog::spdlog
 )
 
-target_link_libraries(CoreQ PUBLIC DesignPrinciples)
+target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DataProcess)
 
 target_include_directories(CoreQ PUBLIC
                           "${PROJECT_BINARY_DIR}"
-                          "${PROJECT_SOURCE_DIR}/DesignPrinciples"
+                          "${PROJECT_SOURCE_DIR}/DesignPatternsPrinciples"
+                          "${PROJECT_SOURCE_DIR}/DataProcess"
                           )
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

@@ -1,6 +1,7 @@
 #ifndef OCP_H
 #define OCP_H
 
+//https://en.wikipedia.org/wiki/Composition_over_inheritance
 //解释： 对扩展开放，对修改关闭，通过继承扩展功能。
 //良好设计： 使用抽象类扩展形状类型，无需修改现有代码。
 class Shape {

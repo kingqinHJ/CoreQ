@@ -1,6 +1,7 @@
 #ifndef LOD_H
 #define LOD_H
 
+//https://pawelpluta.com/the-law-of-demeter-by-example/
 //定义：一个对象应该对其他对象有尽可能少的了解。只与直接的朋友通信，不与“陌生人”交流。
 
 //好处：降低对象间的耦合，提高代码的可维护性。

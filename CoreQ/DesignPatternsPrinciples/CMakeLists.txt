@@ -1,4 +1,4 @@
-add_library(DesignPrinciples SRP.h
+add_library(DesignPatternsPrinciples SRP.h
     OCP.h
     LSP.h
     ISP.h

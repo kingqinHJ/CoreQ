@@ -2,6 +2,7 @@
 #define LSP_H
 #include <stdexcept>
 
+//https://medium.com/@oleksandra_shershen/solid-principles-implementation-and-examples-in-c-99f0d7e3e868
 //定义：子类应该能够替换掉父类，并且不影响程序的正确性。即子类必须完全实现父类的方法，且不改变父类的行为。
 //好处：确保子类可以无缝替换父类，提高代码的可靠性。
 
