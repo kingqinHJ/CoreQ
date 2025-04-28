@@ -52,6 +52,8 @@ public:
 private:
     QLabel *resultLabel;
 
+    quint16 mflag=0;
+
     void addDemoButton(QVBoxLayout *layout, const QString &text, std::function<void()> callback) {
         QPushButton *button = new QPushButton(text, this);
         layout->addWidget(button);
@@ -107,9 +109,15 @@ private:
     }
 
     void demoMemberFunctionPointer() {
-        resultLabel->setText("成员函数指针:\n"
+        resultLabel->setText(tr("第 %1 次调用,成员函数指针:\n"
                              "void (ClassName::*memberFn)() = &ClassName::method;\n"
-                             "(object.*memberFn)(); // 调用");
+                             "(object.*memberFn)(); // 调用").arg(mflag+1));
+        ++mflag;
+        if(mflag==16)
+        {
+            mflag=0;
+            return;
+        }
 
         // 成员函数指针示例
         using MemberFn = void (CallbackDemoWidget::*)();
