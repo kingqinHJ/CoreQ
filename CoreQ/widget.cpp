@@ -34,6 +34,7 @@ void Widget::setupUI()
     navigationList->addItem("HTTP示例");
     navigationList->addItem("callback");
     navigationList->addItem("JSON操作");
+    navigationList->addItem("现代C++");
     // TODO: 添加更多功能项
     
     // 设置主布局
@@ -47,7 +48,7 @@ void Widget::setupUI()
 
 void Widget::createPages()
 {
-    QStringList pageTypes = {"Settings", "Promise", "Http", "Callback", "Json"};
+    QStringList pageTypes = {"Settings", "Promise", "Http", "Callback", "Json", "ModernCpp"};
     for (const QString &type : pageTypes) {
         QWidget *page = PageFactory::CreateWidget(type, this);
         if (page) {
@@ -56,8 +57,8 @@ void Widget::createPages()
         }
     }
     
-    // // 设置初始页面为JSON页面
-    // navigationList->setCurrentRow(4);
+    // 设置初始页面为JSON页面
+    navigationList->setCurrentRow(4);
 }
 
 void Widget::initConnections()

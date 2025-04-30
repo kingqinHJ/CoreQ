@@ -6,6 +6,7 @@
 #include "httpwidget.h"
 #include "callbackdemowidget.h"
 #include "jsonwidget.h"
+#include "ModernCpp/moderncppwidget.h"
 
 class PageFactory{
 public:
@@ -16,6 +17,7 @@ public:
         if (type == "Http") return new HttpWidget(parent);
         if (type == "Callback") return new CallbackDemoWidget(parent);
         if (type == "Json") return new JsonWidget(parent);
+        if (type == "ModernCpp") return new ModernCppWidget(parent);
         return nullptr;
     }
 };

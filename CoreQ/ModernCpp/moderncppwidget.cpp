@@ -1,0 +1,695 @@
+#include "moderncppwidget.h"
+#include <QDebug>
+#include <QStringList>
+#include <QFont>
+#include <QTime>
+#include <thread>
+#include <chrono>
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <memory>
+#include <random>
+
+// CppFeatureTable 类实现
+CppFeatureTable::CppFeatureTable(QWidget* parent) : QWidget(parent)
+{
+    layout = new QVBoxLayout(this);
+    tableWidget = new QTableWidget(this);
+    
+    // 设置表格列数和列标题
+    tableWidget->setColumnCount(4);
+    QStringList headers;
+    headers << "Featrue Name" << "Classify" << "Usage Scenario" << "execute";
+    tableWidget->setHorizontalHeaderLabels(headers);
+    
+    // 设置表格样式
+    tableWidget->setAlternatingRowColors(true);
+    tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
+    tableWidget->setSelectionBehavior(QTableWidget::SelectRows);
+    
+    // 连接单元格点击信号
+    connect(tableWidget, &QTableWidget::cellClicked, this, &CppFeatureTable::onCellClicked);
+    
+    layout->addWidget(tableWidget);
+    setLayout(layout);
+}
+
+void CppFeatureTable::addFeature(const QString& name, const QString& category, const QString& useCase, 
+                               std::function<void(QTextEdit*)> demoFunction)
+{
+    // 创建特性信息
+    FeatureInfo feature;
+    feature.name = name;
+    feature.category = category;
+    feature.useCase = useCase;
+    feature.demoFunction = demoFunction;
+    features.append(feature);
+    
+    // 更新表格行数
+    int row = tableWidget->rowCount();
+    tableWidget->setRowCount(row + 1);
+    
+    // 填充表格内容
+    tableWidget->setItem(row, 0, new QTableWidgetItem(name));
+    tableWidget->setItem(row, 1, new QTableWidgetItem(category));
+    tableWidget->setItem(row, 2, new QTableWidgetItem(useCase));
+    
+    QPushButton* runButton = new QPushButton("运行", this);
+    runButton->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; border-radius: 4px; padding: 5px; }");
+    tableWidget->setCellWidget(row, 3, runButton);
+    
+    connect(runButton, &QPushButton::clicked, [this, row]() {
+        const FeatureInfo& info = features[row];
+        emit featureClicked(info.name, info.category, info.demoFunction);
+    });
+}
+
+void CppFeatureTable::onCellClicked(int row, int column)
+{
+    if (column == 3 && row < features.size()) {
+        const FeatureInfo& info = features[row];
+        emit featureClicked(info.name, info.category, info.demoFunction);
+    }
+}
+
+// ModernCppWidget 类实现
+ModernCppWidget::ModernCppWidget(QWidget *parent) : QWidget(parent)
+{
+    setupUI();
+    createFeatureTables();
+}
+
+ModernCppWidget::~ModernCppWidget()
+{
+}
+
+void ModernCppWidget::setupUI()
+{
+    mainLayout = new QVBoxLayout(this);
+    
+    // 标题
+    QLabel* titleLabel = new QLabel("Modern C++", this);
+    QFont titleFont = titleLabel->font();
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    titleLabel->setFont(titleFont);
+    titleLabel->setAlignment(Qt::AlignCenter);
+    
+    // 输出文本框
+    outputTextEdit = new QTextEdit(this);
+    outputTextEdit->setReadOnly(true);
+    outputTextEdit->setMinimumHeight(200);
+    outputTextEdit->setStyleSheet("QTextEdit { font-family: Consolas, Courier, monospace; background-color: #f8f8f8; border: 1px solid #ddd; padding: 8px; }");
+    
+    // 按钮布局
+    buttonLayout = new QHBoxLayout();
+    QString buttonTitles[] = {"C++11", "C++14", "C++17", "C++20", "C++23"};
+    QString buttonColors[] = {"#3498db", "#9b59b6", "#e74c3c", "#2ecc71", "#f39c12"};
+    
+    for (int i = 0; i < 5; ++i) {
+        buttons[i] = new QPushButton(buttonTitles[i], this);
+        buttons[i]->setStyleSheet(QString("QPushButton { background-color: %1; color: white; "
+                                           "border-radius: 4px; padding: 8px; font-weight: bold; }")
+                                    .arg(buttonColors[i]));
+        buttonLayout->addWidget(buttons[i]);
+        
+        connect(buttons[i], &QPushButton::clicked, [this, i]() {
+            onButtonClicked(i);
+        });
+    }
+    
+    // 堆叠窗口部件
+    stackedWidget = new QStackedWidget(this);
+    
+    // 添加到主布局
+    mainLayout->addWidget(titleLabel);
+    mainLayout->addWidget(outputTextEdit);
+    mainLayout->addLayout(buttonLayout);
+    mainLayout->addWidget(stackedWidget);
+    
+    setLayout(mainLayout);
+    setMinimumSize(800, 600);
+}
+
+void ModernCppWidget::createFeatureTables()
+{
+    // 创建五个表格页面
+    cpp11Table = new CppFeatureTable(this);
+    cpp14Table = new CppFeatureTable(this);
+    cpp17Table = new CppFeatureTable(this);
+    cpp20Table = new CppFeatureTable(this);
+    cpp23Table = new CppFeatureTable(this);
+    
+    // 添加到堆叠窗口部件
+    stackedWidget->addWidget(cpp11Table);
+    stackedWidget->addWidget(cpp14Table);
+    stackedWidget->addWidget(cpp17Table);
+    stackedWidget->addWidget(cpp20Table);
+    stackedWidget->addWidget(cpp23Table);
+    
+    // 连接各表格的点击信号
+    connect(cpp11Table, &CppFeatureTable::featureClicked, this, &ModernCppWidget::onFeatureClicked);
+    connect(cpp14Table, &CppFeatureTable::featureClicked, this, &ModernCppWidget::onFeatureClicked);
+    connect(cpp17Table, &CppFeatureTable::featureClicked, this, &ModernCppWidget::onFeatureClicked);
+    connect(cpp20Table, &CppFeatureTable::featureClicked, this, &ModernCppWidget::onFeatureClicked);
+    connect(cpp23Table, &CppFeatureTable::featureClicked, this, &ModernCppWidget::onFeatureClicked);
+    
+    // 设置各版本特性
+    setupCpp11Features(cpp11Table);
+    setupCpp14Features(cpp14Table);
+    setupCpp17Features(cpp17Table);
+    setupCpp20Features(cpp20Table);
+    setupCpp23Features(cpp23Table);
+    
+    // 默认显示C++11页面
+    stackedWidget->setCurrentIndex(0);
+    buttons[0]->setChecked(true);
+}
+
+void ModernCppWidget::onButtonClicked(int index)
+{
+    stackedWidget->setCurrentIndex(index);
+}
+
+void ModernCppWidget::onFeatureClicked(const QString& featureName, const QString& category, std::function<void(QTextEdit*)> demoFunction)
+{
+    outputTextEdit->clear();
+    outputTextEdit->append(QString("<h3>特性: %1 (%2)</h3>").arg(featureName).arg(category));
+    outputTextEdit->append("<p>执行结果:</p>");
+    
+    try {
+        demoFunction(outputTextEdit);
+    } catch (const std::exception& e) {
+        outputTextEdit->append(QString("<span style='color: red;'>发生异常: %1</span>").arg(e.what()));
+    } catch (...) {
+        outputTextEdit->append("<span style='color: red;'>发生未知异常</span>");
+    }
+}
+
+void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
+{
+    // Lambda表达式
+    table->addFeature(
+        "Lambda",
+        "C plus plus Features",
+        "创建简单的匿名函数,用于就地定义简单的函数",
+        [](QTextEdit* output) {
+            auto sum = [](int a, int b) { return a + b; };
+            output->append(QString("Lambda计算 5 + 3 = %1").arg(sum(5, 3)));
+            
+            std::vector<int> numbers = {1, 2, 3, 4, 5};
+            int total = 0;
+            std::for_each(numbers.begin(), numbers.end(), [&total](int n) { total += n; });
+            output->append(QString("数组元素总和: %1").arg(total));
+        }
+    );
+    
+    // 智能指针
+    table->addFeature(
+        "智能指针", 
+        "Standard library Update",
+        "Automatic memory management to prevent memory leaks",
+        [](QTextEdit* output) {
+            // std::unique_ptr示例
+            output->append("std::unique_ptr示例:");
+            std::unique_ptr<int> ptr1 = std::make_unique<int>(42);
+            output->append(QString("unique_ptr值: %1").arg(*ptr1));
+            
+            // std::shared_ptr示例
+            output->append("\nstd::shared_ptr示例:");
+            std::shared_ptr<int> ptr2 = std::make_shared<int>(100);
+            std::shared_ptr<int> ptr3 = ptr2;
+            output->append(QString("shared_ptr值: %1").arg(*ptr2));
+            output->append(QString("引用计数: %1").arg(ptr2.use_count()));
+        }
+    );
+    
+    // auto关键字
+    table->addFeature(
+        "auto",
+        "C++ Feature",
+        "Automatic type derivation and simplified variable declaration",
+        [](QTextEdit* output) {
+            auto i = 42;  // int
+            auto d = 3.14; // double
+            auto s = "hello"; // const char*
+            
+            output->append(QString("auto整数: %1 (类型: int)").arg(i));
+            output->append(QString("auto浮点数: %1 (类型: double)").arg(d));
+            output->append(QString("auto字符串: %1 (类型: const char*)").arg(s));
+            
+            std::vector<int> vec = {1, 2, 3, 4, 5};
+            output->append("\n使用auto遍历容器:");
+            for (const auto& v : vec) {
+                output->append(QString("  元素: %1").arg(v));
+            }
+        }
+    );
+    
+    // 基于范围的for循环
+    table->addFeature(
+        "基于范围的for循环", 
+        "C++ feature",
+        "Simplify container traversal",
+        [](QTextEdit* output) {
+            std::vector<std::string> fruits = {"苹果", "香蕉", "橙子", "葡萄"};
+            
+            output->append("使用传统for循环:");
+            for (size_t i = 0; i < fruits.size(); ++i) {
+                output->append(QString("  水果[%1]: %2").arg(i).arg(QString::fromStdString(fruits[i])));
+            }
+            
+            output->append("\n使用基于范围的for循环:");
+            for (const auto& fruit : fruits) {
+                output->append(QString("  水果: %1").arg(QString::fromStdString(fruit)));
+            }
+        }
+    );
+    
+    // 移动语义
+    table->addFeature(
+        "移动语义", 
+        "C++ feture",
+        "避免不必要的对象拷贝，提高性能", 
+        [](QTextEdit* output) {
+            auto now = []() -> QString { 
+                return QTime::currentTime().toString("hh:mm:ss.zzz"); 
+            };
+            
+            output->append(QString("开始时间: %1").arg(now()));
+            
+            std::vector<std::string> v1(1000000, "测试");
+            output->append(QString("创建大向量 v1，大小: %1").arg(v1.size()));
+            
+            output->append(QString("复制前时间: %1").arg(now()));
+            std::vector<std::string> v2 = v1; // 拷贝操作
+            output->append(QString("拷贝完成，v2大小: %1").arg(v2.size()));
+            
+            output->append(QString("移动前时间: %1").arg(now()));
+            std::vector<std::string> v3 = std::move(v1); // 移动操作
+            output->append(QString("移动完成，v3大小: %1, v1大小: %2").arg(v3.size()).arg(v1.size()));
+            output->append(QString("结束时间: %1").arg(now()));
+        }
+    );
+}
+
+void ModernCppWidget::setupCpp14Features(CppFeatureTable* table)
+{
+    // 泛型lambda
+    table->addFeature(
+        "Generic Lambda Expression",
+        "C++ Feature",
+        " Creating a Lambda Expression that can Handle Multiple Types.",
+        [](QTextEdit* output) {
+            // C++14中的泛型lambda
+            auto genericSum = [](auto a, auto b) { return a + b; };
+            
+            output->append(QString("泛型Lambda计算整数: 5 + 3 = %1").arg(genericSum(5, 3)));
+            output->append(QString("泛型Lambda计算浮点数: 3.14 + 2.71 = %1").arg(genericSum(3.14, 2.71)));
+            output->append(QString("泛型Lambda计算字符串: hello + world = %1").arg(
+                              QString::fromStdString(genericSum(std::string("hello"), std::string("world")))));
+        }
+    );
+    
+    // // 变量模板
+    // table->addFeature(
+    //     "变量模板",
+    //     "C++ feature",
+    //     "Create a generic variable that can adjust its value based on the type",
+    //     [](QTextEdit* output) {
+    //         // 演示C++14变量模板
+    //         output->append("变量模板演示:");
+            
+    //         // 定义一个变量模板，用于演示目的
+    //         template<typename T>
+    //         constexpr T pi = T(3.1415926535897932385);
+            
+    //         output->append(QString("pi<int> = %1").arg(pi<int>));
+    //         output->append(QString("pi<float> = %1").arg(pi<float>));
+    //         output->append(QString("pi<double> = %1").arg(pi<double>));
+    //     }
+    // );
+    
+    // 改进的constexpr
+    table->addFeature(
+        "改进的constexpr", 
+        "语言特性", 
+        "扩展了编译期计算能力", 
+        [](QTextEdit* output) {
+            // C++14中可以在constexpr函数中使用更多语言特性
+            constexpr auto factorial = [](int n) {
+                int result = 1;
+                for (int i = 1; i <= n; ++i) {
+                    result *= i;
+                }
+                return result;
+            };
+            
+            output->append("计算阶乘：");
+            output->append(QString("5! = %1").arg(factorial(5)));
+            output->append(QString("10! = %1").arg(factorial(10)));
+        }
+    );
+}
+
+void ModernCppWidget::setupCpp17Features(CppFeatureTable* table)
+{
+    // 结构化绑定
+    table->addFeature(
+        "结构化绑定", 
+        "语言特性", 
+        "简化多返回值的获取", 
+        [](QTextEdit* output) {
+            // 使用结构化绑定
+            std::pair<int, std::string> person = {28, "张三"};
+            auto [age, name] = person;
+            
+            output->append("使用结构化绑定获取pair的元素：");
+            output->append(QString("姓名: %1, 年龄: %2").arg(QString::fromStdString(name)).arg(age));
+            
+            std::map<std::string, int> scores = {{"语文", 90}, {"数学", 85}, {"英语", 95}};
+            output->append("\n使用结构化绑定遍历map：");
+            for (const auto& [subject, score] : scores) {
+                output->append(QString("科目: %1, 成绩: %2").arg(QString::fromStdString(subject)).arg(score));
+            }
+        }
+    );
+    
+    // if/switch初始化语句
+    table->addFeature(
+        "if/switch初始化语句", 
+        "语言特性", 
+        "在条件语句中定义临时变量", 
+        [](QTextEdit* output) {
+            output->append("if语句初始化：");
+            // C++17的if初始化语句
+            if (int value = 42; value > 10) {
+                output->append(QString("值 %1 大于10").arg(value));
+            } else {
+                output->append(QString("值 %1 不大于10").arg(value));
+            }
+            
+            output->append("\nswitch语句初始化：");
+            switch (int dice = rand() % 6 + 1; dice) {
+                case 1:
+                    output->append(QString("掷骰子结果: %1 - 很不幸").arg(dice));
+                    break;
+                case 6:
+                    output->append(QString("掷骰子结果: %1 - 非常幸运").arg(dice));
+                    break;
+                default:
+                    output->append(QString("掷骰子结果: %1 - 一般").arg(dice));
+            }
+        }
+    );
+    
+    // std::optional
+    table->addFeature(
+        "std::optional", 
+        "标准库更新", 
+        "表示可能存在或不存在的值", 
+        [](QTextEdit* output) {
+            // 模拟std::optional功能
+            output->append("std::optional示例：");
+            
+            auto findValue = [](int searchKey) -> std::optional<std::string> {
+                std::map<int, std::string> data = {
+                    {1, "一"}, {2, "二"}, {3, "三"}, {5, "五"}
+                };
+                
+                auto it = data.find(searchKey);
+                if (it != data.end()) {
+                    return it->second;
+                }
+                return std::nullopt;
+            };
+            
+            auto printResult = [output](int key, const std::optional<std::string>& result) {
+                if (result) {
+                    output->append(QString("键 %1 对应的值: %2").arg(key).arg(QString::fromStdString(*result)));
+                } else {
+                    output->append(QString("键 %1 没有对应的值").arg(key));
+                }
+            };
+            
+            printResult(1, findValue(1));
+            printResult(4, findValue(4));
+            printResult(5, findValue(5));
+        }
+    );
+}
+
+void ModernCppWidget::setupCpp20Features(CppFeatureTable* table)
+{
+    // 概念和约束(Concepts)
+    table->addFeature(
+        "概念和约束(Concepts)", 
+        "语言特性", 
+        "增强模板参数的约束能力", 
+        [](QTextEdit* output) {
+            output->append("C++20概念和约束 - 代码示例:");
+            output->append(R"(
+// 定义一个概念
+template<typename T>
+concept Numerical = std::is_arithmetic_v<T>;
+
+// 使用概念约束函数模板
+template<Numerical T>
+T add(T a, T b) {
+    return a + b;
+}
+
+// 使用
+int result1 = add(5, 3);       // 正确
+double result2 = add(3.14, 2.71); // 正确
+// std::string result3 = add("hello", "world"); // 错误，字符串不满足Numerical概念
+)");
+            
+            output->append("\n概念的主要好处:");
+            output->append("1. 提供更清晰的编译错误信息");
+            output->append("2. 约束模板参数的类型");
+            output->append("3. 改进代码可读性和API设计");
+            output->append("4. 支持函数重载基于概念");
+        }
+    );
+    
+    // 协程(Coroutines)
+    table->addFeature(
+        "协程(Coroutines)", 
+        "语言特性", 
+        "简化异步编程", 
+        [](QTextEdit* output) {
+            output->append("C++20协程 - 代码示例:");
+            output->append(R"(
+#include <coroutine>
+#include <iostream>
+
+struct ReturnObject {
+    struct promise_type {
+        ReturnObject get_return_object() { return {}; }
+        std::suspend_never initial_suspend() { return {}; }
+        std::suspend_never final_suspend() noexcept { return {}; }
+        void return_void() {}
+        void unhandled_exception() {}
+    };
+};
+
+struct Awaiter {
+    bool await_ready() { return false; }
+    void await_suspend(std::coroutine_handle<> h) {
+        std::thread([h]() {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            h.resume();
+        }).detach();
+    }
+    void await_resume() {}
+};
+
+ReturnObject coroutineFunction() {
+    std::cout << "协程开始\n";
+    co_await Awaiter{};
+    std::cout << "协程恢复执行\n";
+}
+
+// 使用
+int main() {
+    coroutineFunction();
+    std::cout << "主函数继续执行\n";
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+}
+)");
+            
+            output->append("\n协程的主要好处:");
+            output->append("1. 使异步代码看起来像同步代码");
+            output->append("2. 简化状态机实现");
+            output->append("3. 支持生成器和异步IO操作");
+        }
+    );
+    
+    // 范围库(Ranges)
+    table->addFeature(
+        "范围库(Ranges)", 
+        "标准库更新", 
+        "简化序列操作", 
+        [](QTextEdit* output) {
+            output->append("C++20范围库 - 代码示例:");
+            output->append(R"(
+#include <ranges>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    
+    // 使用范围库筛选出所有偶数并乘以2
+    auto results = numbers 
+        | std::views::filter([](int n) { return n % 2 == 0; })
+        | std::views::transform([](int n) { return n * 2; });
+    
+    // 输出结果
+    for (auto v : results) {
+        std::cout << v << " "; // 输出: 4 8 12 16 20
+    }
+}
+)");
+            
+            output->append("\n范围库的主要好处:");
+            output->append("1. 支持链式操作");
+            output->append("2. 惰性求值，提高性能");
+            output->append("3. 更简洁的代码");
+            output->append("4. 更好的可读性");
+        }
+    );
+}
+
+void ModernCppWidget::setupCpp23Features(CppFeatureTable* table)
+{
+    // std::expected
+    table->addFeature(
+        "std::expected", 
+        "标准库更新", 
+        "更好地处理可能失败的操作", 
+        [](QTextEdit* output) {
+            output->append("C++23 std::expected - 代码示例:");
+            output->append(R"(
+#include <expected>
+#include <string>
+#include <iostream>
+
+enum class ErrorCode { FileNotFound, NetworkError, OutOfMemory };
+
+// 返回expected的函数
+std::expected<std::string, ErrorCode> readFileContent(const std::string& path) {
+    // 检查文件是否存在
+    if (path.empty()) {
+        return std::unexpected(ErrorCode::FileNotFound);
+    }
+    
+    // 假设我们成功读取了文件
+    return "文件内容...";
+}
+
+int main() {
+    auto result = readFileContent("example.txt");
+    
+    if (result) {
+        std::cout << "成功读取文件: " << *result << std::endl;
+    } else {
+        if (result.error() == ErrorCode::FileNotFound) {
+            std::cout << "错误: 文件未找到" << std::endl;
+        }
+    }
+}
+)");
+            
+            output->append("\nstd::expected的主要好处:");
+            output->append("1. 比异常更轻量的错误处理");
+            output->append("2. 强制检查错误条件");
+            output->append("3. 适合需要返回错误信息的函数");
+        }
+    );
+    
+    // 多维下标运算符
+    table->addFeature(
+        "多维下标运算符", 
+        "语言特性", 
+        "简化多维数组访问", 
+        [](QTextEdit* output) {
+            output->append("C++23多维下标运算符 - 代码示例:");
+            output->append(R"(
+#include <iostream>
+
+class Matrix {
+private:
+    int data[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+
+public:
+    // C++23支持的多维下标运算符
+    auto& operator[](int i, int j) {
+        return data[i][j];
+    }
+    
+    const auto& operator[](int i, int j) const {
+        return data[i][j];
+    }
+};
+
+int main() {
+    Matrix m;
+    std::cout << m[1, 2] << std::endl; // 输出6
+    m[0, 0] = 10;
+    std::cout << m[0, 0] << std::endl; // 输出10
+}
+)");
+            
+            output->append("\n多维下标运算符的好处:");
+            output->append("1. 提供更自然的多维数组访问语法");
+            output->append("2. 可以在自定义类中实现更直观的接口");
+        }
+    );
+    
+    // std::flat_map
+    table->addFeature(
+        "std::flat_map", 
+        "标准库更新", 
+        "更高效的小型映射实现", 
+        [](QTextEdit* output) {
+            output->append("C++23 std::flat_map - 代码示例:");
+            output->append(R"(
+#include <flat_map>
+#include <string>
+#include <iostream>
+
+int main() {
+    // 创建一个flat_map
+    std::flat_map<std::string, int> scores = {
+        {"Alice", 95},
+        {"Bob", 87},
+        {"Charlie", 92}
+    };
+    
+    // 查询元素
+    std::cout << "Bob的分数: " << scores["Bob"] << std::endl;
+    
+    // 添加新元素
+    scores["David"] = 78;
+    
+    // flat_map特性：内部使用排序数组，小型映射更高效
+    // 遍历
+    for (const auto& [name, score] : scores) {
+        std::cout << name << ": " << score << std::endl;
+    }
+}
+)");
+            
+            output->append("\nstd::flat_map的主要优势:");
+            output->append("1. 对于小型映射，比std::map更高效");
+            output->append("2. 更好的缓存局部性");
+            output->append("3. 内存占用更少");
+            output->append("4. 提供与std::map相同的接口");
+        }
+    );
+} 

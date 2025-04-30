@@ -28,7 +28,6 @@ set(PROJECT_SOURCES
 						  
 add_subdirectory(DesignPatternsPrinciples)
 add_subdirectory(DataProcess)
-add_subdirectory(AdvancedFunction)
 add_subdirectory(ModernCpp)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -66,13 +65,12 @@ target_link_libraries(CoreQ PRIVATE
     spdlog::spdlog
 )
 
-target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DataProcess AdvancedFunction ModernCpp)
+target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DataProcess ModernCpp)
 
 target_include_directories(CoreQ PUBLIC
                           "${PROJECT_BINARY_DIR}"
                           "${PROJECT_SOURCE_DIR}/DesignPatternsPrinciples"
                           "${PROJECT_SOURCE_DIR}/DataProcess"
-                          "${PROJECT_SOURCE_DIR}/AdvancedFunction"
                           "${PROJECT_SOURCE_DIR}/ModernCpp"
                           )
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
