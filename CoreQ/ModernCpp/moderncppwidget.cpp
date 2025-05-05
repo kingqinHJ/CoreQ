@@ -335,8 +335,8 @@ void ModernCppWidget::setupCpp14Features(CppFeatureTable* table)
     
     // 改进的constexpr
     table->addFeature(
-        "改进的constexpr", 
-        "语言特性", 
+        "改进的constexpr",
+        "c++ feature",
         "扩展了编译期计算能力", 
         [](QTextEdit* output) {
             // C++14中可以在constexpr函数中使用更多语言特性
@@ -348,7 +348,7 @@ void ModernCppWidget::setupCpp14Features(CppFeatureTable* table)
                 return result;
             };
             
-            output->append("计算阶乘：");
+            output->append("Calculate factorial");
             output->append(QString("5! = %1").arg(factorial(5)));
             output->append(QString("10! = %1").arg(factorial(10)));
         }
@@ -359,8 +359,8 @@ void ModernCppWidget::setupCpp17Features(CppFeatureTable* table)
 {
     // 结构化绑定
     table->addFeature(
-        "结构化绑定", 
-        "语言特性", 
+        "Structured binding",
+        "C++ featrue",
         "简化多返回值的获取", 
         [](QTextEdit* output) {
             // 使用结构化绑定
@@ -371,7 +371,7 @@ void ModernCppWidget::setupCpp17Features(CppFeatureTable* table)
             output->append(QString("姓名: %1, 年龄: %2").arg(QString::fromStdString(name)).arg(age));
             
             std::map<std::string, int> scores = {{"语文", 90}, {"数学", 85}, {"英语", 95}};
-            output->append("\n使用结构化绑定遍历map：");
+            output->append("\nTraverse using structured binding map");
             for (const auto& [subject, score] : scores) {
                 output->append(QString("科目: %1, 成绩: %2").arg(QString::fromStdString(subject)).arg(score));
             }
@@ -380,8 +380,8 @@ void ModernCppWidget::setupCpp17Features(CppFeatureTable* table)
     
     // if/switch初始化语句
     table->addFeature(
-        "if/switch初始化语句", 
-        "语言特性", 
+        "if/switch Initialization statement",
+        "C++ featrue",
         "在条件语句中定义临时变量", 
         [](QTextEdit* output) {
             output->append("if语句初始化：");
@@ -395,51 +395,51 @@ void ModernCppWidget::setupCpp17Features(CppFeatureTable* table)
             output->append("\nswitch语句初始化：");
             switch (int dice = rand() % 6 + 1; dice) {
                 case 1:
-                    output->append(QString("掷骰子结果: %1 - 很不幸").arg(dice));
+                    output->append(QString("result: %1 - unluckily").arg(dice));
                     break;
                 case 6:
-                    output->append(QString("掷骰子结果: %1 - 非常幸运").arg(dice));
+                    output->append(QString("result: %1 - luckily").arg(dice));
                     break;
                 default:
-                    output->append(QString("掷骰子结果: %1 - 一般").arg(dice));
+                    output->append(QString("result: %1 - just so so").arg(dice));
             }
         }
     );
     
-    // std::optional
-    table->addFeature(
-        "std::optional", 
-        "标准库更新", 
-        "表示可能存在或不存在的值", 
-        [](QTextEdit* output) {
-            // 模拟std::optional功能
-            output->append("std::optional示例：");
+    // // std::optional
+    // table->addFeature(
+    //     "std::optional",
+    //     "std",
+    //     "Represents values that may exist or may not exist",
+    //     [](QTextEdit* output) {
+    //         // 模拟std::optional功能
+    //         output->append("std::optional示例");
             
-            auto findValue = [](int searchKey) -> std::optional<std::string> {
-                std::map<int, std::string> data = {
-                    {1, "一"}, {2, "二"}, {3, "三"}, {5, "五"}
-                };
+    //         auto findValue = [](int searchKey) -> std::optional<std::string> {
+    //             std::map<int, std::string> data = {
+    //                 {1, QString::fromLocal8Bit("一")}, {2, QString::fromLocal8Bit("二")}, {3, QString::fromLocal8Bit("三")}, {5, QString::fromLocal8Bit("五")}
+    //             };
                 
-                auto it = data.find(searchKey);
-                if (it != data.end()) {
-                    return it->second;
-                }
-                return std::nullopt;
-            };
+    //             auto it = data.find(searchKey);
+    //             if (it != data.end()) {
+    //                 return it->second;
+    //             }
+    //             return std::nullopt;
+    //         };
             
-            auto printResult = [output](int key, const std::optional<std::string>& result) {
-                if (result) {
-                    output->append(QString("键 %1 对应的值: %2").arg(key).arg(QString::fromStdString(*result)));
-                } else {
-                    output->append(QString("键 %1 没有对应的值").arg(key));
-                }
-            };
+    //         auto printResult = [output](int key, const std::optional<std::string>& result) {
+    //             if (result) {
+    //                 output->append(QString("键 %1 对应的值: %2").arg(key).arg(QString::fromStdString(*result)));
+    //             } else {
+    //                 output->append(QString("键 %1 没有对应的值").arg(key));
+    //             }
+    //         };
             
-            printResult(1, findValue(1));
-            printResult(4, findValue(4));
-            printResult(5, findValue(5));
-        }
-    );
+    //         printResult(1, findValue(1));
+    //         printResult(4, findValue(4));
+    //         printResult(5, findValue(5));
+    //     }
+    // );
 }
 
 void ModernCppWidget::setupCpp20Features(CppFeatureTable* table)
@@ -447,8 +447,8 @@ void ModernCppWidget::setupCpp20Features(CppFeatureTable* table)
     // 概念和约束(Concepts)
     table->addFeature(
         "概念和约束(Concepts)", 
-        "语言特性", 
-        "增强模板参数的约束能力", 
+        "C++ feature",
+        "Enhance the constraint ability of template parameters",
         [](QTextEdit* output) {
             output->append("C++20概念和约束 - 代码示例:");
             output->append(R"(
@@ -470,7 +470,7 @@ double result2 = add(3.14, 2.71); // 正确
             
             output->append("\n概念的主要好处:");
             output->append("1. 提供更清晰的编译错误信息");
-            output->append("2. 约束模板参数的类型");
+            output->append("2. Constrain the types of template parameters");
             output->append("3. 改进代码可读性和API设计");
             output->append("4. 支持函数重载基于概念");
         }
@@ -479,8 +479,8 @@ double result2 = add(3.14, 2.71); // 正确
     // 协程(Coroutines)
     table->addFeature(
         "协程(Coroutines)", 
-        "语言特性", 
-        "简化异步编程", 
+        "C++ featrue",
+        "Simplify asynchronous programming",
         [](QTextEdit* output) {
             output->append("C++20协程 - 代码示例:");
             output->append(R"(
@@ -522,20 +522,20 @@ int main() {
 }
 )");
             
-            output->append("\n协程的主要好处:");
-            output->append("1. 使异步代码看起来像同步代码");
-            output->append("2. 简化状态机实现");
-            output->append("3. 支持生成器和异步IO操作");
+            // output->append("\n协程的主要好处:");
+            // output->append("1. 使异步代码看起来像同步代码");
+            // output->append("2. 简化状态机实现");
+            // output->append("3. 支持生成器和异步IO操作");
         }
     );
     
     // 范围库(Ranges)
     table->addFeature(
         "范围库(Ranges)", 
-        "标准库更新", 
-        "简化序列操作", 
+        "std",
+        "Simplify sequence operations",
         [](QTextEdit* output) {
-            output->append("C++20范围库 - 代码示例:");
+//            output->append("C++20范围库 - 代码示例:");
             output->append(R"(
 #include <ranges>
 #include <vector>
@@ -560,7 +560,7 @@ int main() {
             output->append("1. 支持链式操作");
             output->append("2. 惰性求值，提高性能");
             output->append("3. 更简洁的代码");
-            output->append("4. 更好的可读性");
+            output->append("4. Better readability");
         }
     );
 }
@@ -570,7 +570,7 @@ void ModernCppWidget::setupCpp23Features(CppFeatureTable* table)
     // std::expected
     table->addFeature(
         "std::expected", 
-        "标准库更新", 
+        "std",
         "更好地处理可能失败的操作", 
         [](QTextEdit* output) {
             output->append("C++23 std::expected - 代码示例:");
@@ -606,17 +606,17 @@ int main() {
 )");
             
             output->append("\nstd::expected的主要好处:");
-            output->append("1. 比异常更轻量的错误处理");
-            output->append("2. 强制检查错误条件");
+            output->append("1. Error handling that is lighter than exceptions");
+            output->append("2. Enforce the inspection of incorrect conditions");
             output->append("3. 适合需要返回错误信息的函数");
         }
     );
     
     // 多维下标运算符
     table->addFeature(
-        "多维下标运算符", 
-        "语言特性", 
-        "简化多维数组访问", 
+        "Multi-dimensional subscript operator",
+        "C++ feature",
+        "Simplify the access to multi-dimensional arrays",
         [](QTextEdit* output) {
             output->append("C++23多维下标运算符 - 代码示例:");
             output->append(R"(
@@ -654,7 +654,7 @@ int main() {
     // std::flat_map
     table->addFeature(
         "std::flat_map", 
-        "标准库更新", 
+        "std",
         "更高效的小型映射实现", 
         [](QTextEdit* output) {
             output->append("C++23 std::flat_map - 代码示例:");
@@ -686,10 +686,10 @@ int main() {
 )");
             
             output->append("\nstd::flat_map的主要优势:");
-            output->append("1. 对于小型映射，比std::map更高效");
-            output->append("2. 更好的缓存局部性");
-            output->append("3. 内存占用更少");
-            output->append("4. 提供与std::map相同的接口");
+            // output->append("1. 对于小型映射，比std::map更高效");
+            // output->append("2. 更好的缓存局部性");
+            // output->append("3. 内存占用更少");
+            // output->append("4. 提供与std::map相同的接口");
         }
     );
 } 
