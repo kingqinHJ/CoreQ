@@ -177,7 +177,7 @@ void ModernCppWidget::onButtonClicked(int index)
 void ModernCppWidget::onFeatureClicked(const QString& featureName, const QString& category, std::function<void(QTextEdit*)> demoFunction)
 {
     outputTextEdit->clear();
-    outputTextEdit->append(QString("<h3>特性: %1 (%2)</h3>").arg(featureName).arg(category));
+    outputTextEdit->append(QString(QString::fromUtf8("<h3>特性: %1 (%2)</h3>")).arg(featureName).arg(category));
     outputTextEdit->append("<p>执行结果:</p>");
     
     try {

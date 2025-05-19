@@ -1,6 +1,7 @@
 #include "widget.h"
 #include "./ui_widget.h"
 #include "PageFactory.h"
+#include <string>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -30,11 +31,11 @@ void Widget::setupUI()
     // 设置导航列表的样式和固定宽度
     navigationList->setFixedWidth(200);
     navigationList->addItem("QSettings");
-    navigationList->addItem("Promise示例");
-    navigationList->addItem("HTTP示例");
-    navigationList->addItem("callback");
-    navigationList->addItem("JSON操作");
-    navigationList->addItem("现代C++");
+    navigationList->addItem(u8"Promise示例");
+    navigationList->addItem(u8"HTTP示例");
+    navigationList->addItem(u8"callback");
+    navigationList->addItem(u8"JSON操作");
+    navigationList->addItem(u8"现代C++");
     // TODO: 添加更多功能项
     
     // 设置主布局
