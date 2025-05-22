@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <random>
+#include <string>
 
 // CppFeatureTable 类实现
 CppFeatureTable::CppFeatureTable(QWidget* parent) : QWidget(parent)
@@ -57,7 +58,7 @@ void CppFeatureTable::addFeature(const QString& name, const QString& category, c
     tableWidget->setItem(row, 1, new QTableWidgetItem(category));
     tableWidget->setItem(row, 2, new QTableWidgetItem(useCase));
     
-    QPushButton* runButton = new QPushButton("运行", this);
+    QPushButton* runButton = new QPushButton(u8"运行", this);
     runButton->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; border-radius: 4px; padding: 5px; }");
     tableWidget->setCellWidget(row, 3, runButton);
     
@@ -195,15 +196,15 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
     table->addFeature(
         "Lambda",
         "C plus plus Features",
-        "创建简单的匿名函数,用于就地定义简单的函数",
+        u8"创建简单的匿名函数,用于就地定义简单的函数",
         [](QTextEdit* output) {
             auto sum = [](int a, int b) { return a + b; };
-            output->append(QString("Lambda计算 5 + 3 = %1").arg(sum(5, 3)));
+            output->append(QString(u8"Lambda计算 5 + 3 = %1").arg(sum(5, 3)));
             
             std::vector<int> numbers = {1, 2, 3, 4, 5};
             int total = 0;
             std::for_each(numbers.begin(), numbers.end(), [&total](int n) { total += n; });
-            output->append(QString("数组元素总和: %1").arg(total));
+            output->append(QString(u8"数组元素总和: %1").arg(total));
         }
     );
     

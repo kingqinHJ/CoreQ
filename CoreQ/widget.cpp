@@ -59,7 +59,7 @@ void Widget::createPages()
     }
     
     // 设置初始页面为JSON页面
-    navigationList->setCurrentRow(4);
+    //navigationList->setCurrentRow(4);
 }
 
 void Widget::initConnections()

@@ -10,8 +10,8 @@ QSetting::QSetting(QWidget *parent)
     , settings(new QSettings("MyComponent", "CoreQ", this))
     , usernameEdit(new QLineEdit(this))
     , emailEdit(new QLineEdit(this))
-    , saveButton(new QPushButton("保存设置", this))
-    , loadButton(new QPushButton("加载设置", this))
+    , saveButton(new QPushButton(u8"保存设置", this))
+    , loadButton(new QPushButton(u8"加载设置", this))
     , mainLayout(new QVBoxLayout(this))
     , formLayout(new QFormLayout)
 {
@@ -23,8 +23,8 @@ QSetting::QSetting(QWidget *parent)
 void QSetting::setupUI()
 {
     // 设置表单布局
-    formLayout->addRow("用户名:", usernameEdit);
-    formLayout->addRow("邮箱:", emailEdit);
+    formLayout->addRow(u8"用户名:", usernameEdit);
+    formLayout->addRow(u8"邮箱:", emailEdit);
 
     // 设置主布局
     mainLayout->addLayout(formLayout);
@@ -47,7 +47,7 @@ void QSetting::saveSettings()
     settings->setValue("email", emailEdit->text());
     settings->sync();
 
-    QMessageBox::information(this, "保存成功", "设置已成功保存！");
+    QMessageBox::information(this, u8"保存成功", u8"设置已成功保存！");
 }
 
 void QSetting::loadSettings()

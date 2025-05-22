@@ -1,6 +1,7 @@
 #include "qpromise.h"
 #include <random>
 #include <iostream>
+#include<string>
 
 QPromise::QPromise(QWidget *parent)
     : QWidget(parent)
@@ -28,7 +29,7 @@ void QPromise::setupUI()
     progressBar->setValue(0);
     resultLabel->setAlignment(Qt::AlignCenter);
 
-    mainLayout->addWidget(new QLabel("std::promise 示例", this));
+    mainLayout->addWidget(new QLabel(u8"std::promise 示例", this));
     mainLayout->addWidget(startButton);
     mainLayout->addWidget(progressBar);
     mainLayout->addWidget(resultLabel);
@@ -80,7 +81,7 @@ void QPromise::startComputation()
     isComputing = true;
     startButton->setEnabled(false);
     progressBar->setValue(0);
-    resultLabel->setText("正在计算...");
+    resultLabel->setText(u8"正在计算...");
 
     promisePtr = std::make_unique<std::promise<int>>();
     futurePtr = std::make_unique<std::future<int>>(promisePtr->get_future());
@@ -100,7 +101,7 @@ void QPromise::checkResult()
     std::future_status status = futurePtr->wait_for(std::chrono::milliseconds(50));
     if (status == std::future_status::ready) {
         int result = futurePtr->get();
-        resultLabel->setText(QString("计算结果: %1").arg(result));
+        resultLabel->setText(QString(u8"计算结果: %1").arg(result));
         progressBar->setValue(100);
         startButton->setEnabled(true);
         isComputing = false;

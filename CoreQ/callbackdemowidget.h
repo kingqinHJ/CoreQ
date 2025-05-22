@@ -8,19 +8,20 @@
 #include <QLabel>
 #include <QDebug>
 #include <functional>
+#include<string>
 
 class CallbackDemoWidget : public QWidget {
     Q_OBJECT
 
 public:
     CallbackDemoWidget(QWidget *parent = nullptr) : QWidget(parent) {
-        setWindowTitle("回调函数演示");
+        setWindowTitle(u8"回调函数演示");
         resize(400, 600);
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 
         // 标题标签
-        QLabel *titleLabel = new QLabel("回调函数用法演示", this);
+        QLabel *titleLabel = new QLabel(u8"回调函数用法演示", this);
         titleLabel->setAlignment(Qt::AlignCenter);
         QFont titleFont = titleLabel->font();
         titleFont.setPointSize(14);
@@ -40,10 +41,10 @@ public:
         addDemoButton(layout, "signal and slots", [this]() { demoTraditionalSlot(); });
         addDemoButton(layout, "Lambda expression", [this]() { demoLambda(); });
         addDemoButton(layout, "std::function", [this]() { demoStdFunction(); });
-        addDemoButton(layout, "函数指针", [this]() { demoFunctionPointer(); });
-        addDemoButton(layout, "成员函数指针", [this]() { demoMemberFunctionPointer(); });
-        addDemoButton(layout, "函数对象(Functor)", [this]() { demoFunctor(); });
-        addDemoButton(layout, "std::bind", [this]() { demoStdBind(); });
+        addDemoButton(layout, u8"函数指针", [this]() { demoFunctionPointer(); });
+        addDemoButton(layout, u8"成员函数指针", [this]() { demoMemberFunctionPointer(); });
+        addDemoButton(layout, u8"函数对象(Functor)", [this]() { demoFunctor(); });
+        addDemoButton(layout, u8"std::bind", [this]() { demoStdBind(); });
         addDemoButton(layout, "QObject::connect", [this]() { demoQObjectConnect(); });
 
         layout->addStretch();
@@ -62,15 +63,15 @@ private:
 
     // 各种回调函数演示方法
     void demoTraditionalSlot() {
-        resultLabel->setText("传统信号槽:\n"
+        resultLabel->setText(u8"传统信号槽:\n"
                              "connect(button, SIGNAL(clicked()), this, SLOT(onButtonClicked()));\n"
-                             "需要在类中定义 slots: void onButtonClicked();");
+                             u8"需要在类中定义 slots: void onButtonClicked();");
     }
 
     void demoLambda() {
-        resultLabel->setText("Lambda 表达式:\n"
+        resultLabel->setText(u8"Lambda 表达式:\n"
                              "connect(button, &QPushButton::clicked, [=]() {\n"
-                             "    // 在此处理点击事件\n"
+                             u8"    // 在此处理点击事件\n"
                              "});");
 
         // 实际演示一个Lambda
@@ -81,7 +82,7 @@ private:
 
     void demoStdFunction() {
         resultLabel->setText("std::function:\n"
-                             "std::function<void()> callback = []() { /* 处理逻辑 */ };\n"
+                             u8"std::function<void()> callback = []() { /* 处理逻辑 */ };\n"
                              "connect(button, &QPushButton::clicked, this, callback);");
 
         // 实际std::function演示
@@ -90,9 +91,9 @@ private:
     }
 
     void demoFunctionPointer() {
-        resultLabel->setText("函数指针:\n"
+        resultLabel->setText(u8"函数指针:\n"
                              "void (*callback)() = &someFunction;\n"
-                             "// 或直接作为参数传递\n"
+                             u8"// 或直接作为参数传递\n"
                              "void processWithCallback(void (*callback)());");
 
         // 静态函数指针示例
@@ -109,7 +110,7 @@ private:
     }
 
     void demoMemberFunctionPointer() {
-        resultLabel->setText(tr("第 %1 次调用,成员函数指针:\n"
+        resultLabel->setText(tr(u8"第 %1 次调用,成员函数指针:\n"
                              "void (ClassName::*memberFn)() = &ClassName::method;\n"
                              "(object.*memberFn)(); // 调用").arg(mflag+1));
         ++mflag;
@@ -126,7 +127,7 @@ private:
     }
 
     void demoFunctor() {
-        resultLabel->setText("函数对象(Functor):\n"
+        resultLabel->setText(u8"函数对象(Functor):\n"
                              "class MyFunctor {\n"
                              "public:\n"
                              "    void operator()() { /* 处理逻辑 */ }\n"

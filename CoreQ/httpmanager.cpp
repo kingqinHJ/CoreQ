@@ -4,6 +4,7 @@
 #include <QHttpMultiPart>
 #include <QFile>
 #include <QEventLoop>
+#include<string>
 
 HttpManager::HttpManager(QObject *parent)
     : QObject{parent}

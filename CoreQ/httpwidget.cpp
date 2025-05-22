@@ -1,4 +1,5 @@
 #include "httpwidget.h"
+#include<string>
 
 HttpWidget::HttpWidget(QWidget *parent)
     : QWidget(parent)
@@ -6,9 +7,9 @@ HttpWidget::HttpWidget(QWidget *parent)
     , getUrlEdit(new QLineEdit(this))
     , postUrlEdit(new QLineEdit(this))
 //    , formUrlEdit(new QLineEdit(this))
-    , getBtn(new QPushButton("GET请求", this))
-    , postBtn(new QPushButton("POST请求", this))
-    , formBtn(new QPushButton("表单测试", this))
+    , getBtn(new QPushButton(u8"GET请求", this))
+    , postBtn(new QPushButton(u8"POST请求", this))
+    , formBtn(new QPushButton(u8"表单测试", this))
     , mainLayout(new QVBoxLayout(this))
     , getResultEdit(new QTextEdit(this))
     , postResultEdit(new QTextEdit(this))
@@ -21,7 +22,7 @@ HttpWidget::HttpWidget(QWidget *parent)
 void HttpWidget::setupUI()
 {
     // 设置URL输入框的占位符文本
-    getUrlEdit->setPlaceholderText("输入GET请求URL地址");
+    getUrlEdit->setPlaceholderText(u8"输入GET请求URL地址");
     getUrlEdit->setText("http://httpbin.org/get?name=gongjianbo&age=27");
     postUrlEdit->setPlaceholderText("输入POST请求URL地址");
     postUrlEdit->setText("Mr QIN ");
