@@ -178,15 +178,15 @@ void ModernCppWidget::onButtonClicked(int index)
 void ModernCppWidget::onFeatureClicked(const QString& featureName, const QString& category, std::function<void(QTextEdit*)> demoFunction)
 {
     outputTextEdit->clear();
-    outputTextEdit->append(QString(QString::fromUtf8("<h3>特性: %1 (%2)</h3>")).arg(featureName).arg(category));
-    outputTextEdit->append("<p>执行结果:</p>");
+    outputTextEdit->append(QString(QString::fromUtf8(u8"<h3>特性: %1 (%2)</h3>")).arg(featureName).arg(category));
+    outputTextEdit->append(u8"<p>执行结果:</p>");
     
     try {
         demoFunction(outputTextEdit);
     } catch (const std::exception& e) {
-        outputTextEdit->append(QString("<span style='color: red;'>发生异常: %1</span>").arg(e.what()));
+        outputTextEdit->append(QString(u8"<span style='color: red;'>发生异常: %1</span>").arg(e.what()));
     } catch (...) {
-        outputTextEdit->append("<span style='color: red;'>发生未知异常</span>");
+        outputTextEdit->append(u8"<span style='color: red;'>发生未知异常</span>");
     }
 }
 
@@ -210,21 +210,21 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
     
     // 智能指针
     table->addFeature(
-        "智能指针", 
+        u8"智能指针",
         "Standard library Update",
         "Automatic memory management to prevent memory leaks",
         [](QTextEdit* output) {
             // std::unique_ptr示例
-            output->append("std::unique_ptr示例:");
+            output->append(u8"std::unique_ptr示例:");
             std::unique_ptr<int> ptr1 = std::make_unique<int>(42);
-            output->append(QString("unique_ptr值: %1").arg(*ptr1));
+            output->append(QString(u8"unique_ptr值: %1").arg(*ptr1));
             
             // std::shared_ptr示例
-            output->append("\nstd::shared_ptr示例:");
+            output->append(u8"\nstd::shared_ptr示例:");
             std::shared_ptr<int> ptr2 = std::make_shared<int>(100);
             std::shared_ptr<int> ptr3 = ptr2;
-            output->append(QString("shared_ptr值: %1").arg(*ptr2));
-            output->append(QString("引用计数: %1").arg(ptr2.use_count()));
+            output->append(QString(u8"shared_ptr值: %1").arg(*ptr2));
+            output->append(QString(u8"引用计数: %1").arg(ptr2.use_count()));
         }
     );
     
