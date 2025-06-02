@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
+# 禁用vcpkg的自动DLL复制以避免PowerShell CLR错误 - 必须在project()之前设置
+set(VCPKG_APPLOCAL_DEPS OFF)
+set(X_VCPKG_APPLOCAL_DEPS_INSTALL OFF)
+
 project(CoreQ VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -25,7 +29,7 @@ set(PROJECT_SOURCES
         httpwidget.h
         httpwidget.cpp
 )
-						  
+
 add_subdirectory(DesignPatternsPrinciples)
 add_subdirectory(DataProcess)
 add_subdirectory(ModernCpp)
@@ -59,12 +63,7 @@ else()
     endif()
 endif()
 
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /source-charset:utf-8")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /source-charset:utf-8")
-endif()
-
-target_link_libraries(CoreQ PRIVATE 
+target_link_libraries(CoreQ PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
     spdlog::spdlog
