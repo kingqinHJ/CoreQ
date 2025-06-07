@@ -208,6 +208,7 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
     
+    
     // 智能指针
     table->addFeature(
         u8"智能指针",
@@ -215,16 +216,45 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         "Automatic memory management to prevent memory leaks",
         [](QTextEdit* output) {
             // std::unique_ptr示例
-            output->append(u8"std::unique_ptr示例:");
+            output->append(u8"=== std::unique_ptr (独占所有权) ===");
             std::unique_ptr<int> ptr1 = std::make_unique<int>(42);
             output->append(QString(u8"unique_ptr值: %1").arg(*ptr1));
+            output->append(u8"特点: 独占所有权，不可复制，只能移动");
+            
+            // 演示unique_ptr的移动语义
+            std::unique_ptr<int> ptr1_moved = std::move(ptr1);
+            output->append(u8"移动后:");
+            output->append(QString(u8"原ptr1是否为空: %1").arg(ptr1 ? "否" : "是"));
+            output->append(QString(u8"新ptr1_moved值: %1").arg(*ptr1_moved));
             
             // std::shared_ptr示例
-            output->append(u8"\nstd::shared_ptr示例:");
+            output->append(u8"\n=== std::shared_ptr (共享所有权) ===");
             std::shared_ptr<int> ptr2 = std::make_shared<int>(100);
-            std::shared_ptr<int> ptr3 = ptr2;
             output->append(QString(u8"shared_ptr值: %1").arg(*ptr2));
+            output->append(QString(u8"初始引用计数: %1").arg(ptr2.use_count()));
+            
+            // 创建多个shared_ptr指向同一对象
+            std::shared_ptr<int> ptr3 = ptr2;
+            output->append(u8"创建第二个shared_ptr指向同一对象:");
             output->append(QString(u8"引用计数: %1").arg(ptr2.use_count()));
+            output->append(QString(u8"两个指针指向同一对象: %1").arg(ptr2.get() == ptr3.get() ? "是" : "否"));
+ 
+            // std::weak_ptr示例
+            output->append(u8"\n=== std::weak_ptr (弱引用) ===");
+            std::weak_ptr<int> weakPtr = ptr2;
+            output->append(QString(u8"weak_ptr不影响引用计数: %1").arg(ptr2.use_count()));
+            output->append(QString(u8"weak_ptr是否过期: %1").arg(weakPtr.expired() ? "是" : "否"));
+            
+            // 通过weak_ptr安全访问对象
+            if (auto locked = weakPtr.lock()) {
+                output->append(QString(u8"通过weak_ptr访问值: %1").arg(*locked));
+                output->append(QString(u8"临时shared_ptr引用计数: %1").arg(locked.use_count()));
+            }
+            
+            output->append(u8"\n使用场景总结:");
+            output->append(u8"• unique_ptr: 工厂模式、RAII资源管理、类成员管理");
+            output->append(u8"• shared_ptr: 多对象共享资源、异步操作、观察者模式");
+            output->append(u8"• weak_ptr: 解决循环引用、观察对象生命周期、缓存系统");
         }
     );
     

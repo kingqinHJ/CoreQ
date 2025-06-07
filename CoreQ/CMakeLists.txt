@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
 # 禁用vcpkg的自动DLL复制以避免PowerShell CLR错误 - 必须在project()之前设置
-set(VCPKG_APPLOCAL_DEPS OFF)
-set(X_VCPKG_APPLOCAL_DEPS_INSTALL OFF)
+#set(VCPKG_APPLOCAL_DEPS OFF)
+#set(X_VCPKG_APPLOCAL_DEPS_INSTALL OFF)
 
 project(CoreQ VERSION 0.1 LANGUAGES CXX)
 
