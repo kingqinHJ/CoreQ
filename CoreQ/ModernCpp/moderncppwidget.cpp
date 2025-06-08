@@ -258,9 +258,9 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
     
-    // auto关键字
+    // auto、decltype关键字
     table->addFeature(
-        "auto",
+        "auto,decltype",
         "C++ Feature",
         "Automatic type derivation and simplified variable declaration",
         [](QTextEdit* output) {
@@ -277,6 +277,15 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
             for (const auto& v : vec) {
                 output->append(QString("  元素: %1").arg(v));
             }
+
+            // decltype关键字
+            int x = 10;
+            decltype(x) y = 20;
+            output->append(QString("decltype(x) y = %1").arg(y));
+
+            auto func = [](int a, int b) -> int { return a + b; };
+            decltype(func) func2 = func;
+            output->append(QString("decltype(func) func2 = %1").arg(func2(1, 2)));
         }
     );
     
