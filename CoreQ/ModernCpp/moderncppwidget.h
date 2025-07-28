@@ -13,6 +13,10 @@
 #include <functional>
 #include <map>
 
+constexpr int factorial(int n) {
+    return n <= 1 ? 1 : (n * factorial(n - 1));
+}
+
 // 前向声明
 class CppFeatureTable;
 

@@ -12,6 +12,11 @@
 #include <random>
 #include <string>
 
+namespace Modern {
+    void foo(int n) {}
+    void foo(char* p) {}
+}
+
 // CppFeatureTable 类实现
 CppFeatureTable::CppFeatureTable(QWidget* parent) : QWidget(parent)
 {
@@ -234,6 +239,25 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
         );
 
+    // const和constexpr的区别
+    //(1)const
+    //const 关键字主要用于声明一个只读变量，它强调的是运行时的常量性，即一旦变量被初始化后，在程序运行期间其值不能被修改。
+    //可以用于修饰普通变量、函数参数、函数返回值等，用于保证变量在运行时不会被意外修改。
+    //(2)constexpr
+    //constexpr 关键字用于声明常量表达式，它强调的是编译时的常量性，编译器会在编译阶段对 constexpr 修饰的表达式进行求值，生成一个编译时常量。
+    //主要用于需要编译时常量的场景，如数组大小、枚举值、模板参数等。
+    //常量表达式
+    table->addFeature(
+        "constexpr - 常量表达式",
+        "核心语言增强",
+        "允许将计算过程放在编译期进行，可用于定义编译期常量和调用编译期函数。",
+        [](QTextEdit* output) {
+            constexpr int f5 = factorial(5); // 在编译期计算出 120
+            int arr[f5]; // 合法，因为 f5 是编译期常量
+            output->append(QString("arr的长度为:%1").arg(sizeof(arr)));
+        }
+    );
+
     // 智能指针
     table->addFeature(
         u8"智能指针",
@@ -283,6 +307,18 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
     
+    // nullptr关键字
+    table->addFeature(
+        "nullptr",
+        "新增关键字与标识符",
+        "新的空指针常量，解决了之前用 NULL 或 0 带来的类型不安全和重载问题。",
+        [](QTextEdit* output) {
+            //foo(NULL); // 编译错误：二义性
+            Modern::foo(nullptr); // 正确调用 foo(char*)
+            output->append(QString("新的空指针常量，解决了之前用 NULL 或 0 带来的类型不安全和重载问题。"));
+        }
+    );
+
     // auto、decltype关键字
     table->addFeature(
         "auto,decltype",
