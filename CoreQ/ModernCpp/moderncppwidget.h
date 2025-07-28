@@ -12,9 +12,22 @@
 #include <QLabel>
 #include <functional>
 #include <map>
+#include <iostream>
 
 constexpr int factorial(int n) {
     return n <= 1 ? 1 : (n * factorial(n - 1));
+}
+
+inline void  print()
+{
+    std::cout<<"end"<<std::endl;
+}
+
+template<typename T,typename... Args>
+inline void print(T first,Args... args)
+{
+    std::cout<<first<<" ";
+    print(args...);
 }
 
 // 前向声明
@@ -89,4 +102,4 @@ private:
     QList<FeatureInfo> features;
 };
 
-#endif // MODERNCPPWIDGET_H 
+#endif // MODERNCPPWIDGET_H

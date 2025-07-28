@@ -258,6 +258,22 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
 
+    //用途	描述
+    //通用函数	类型安全的打印、日志、参数遍历等
+    //元编程	类型列表、递归模板、trait 分析
+    //转发器	完美转发，构建包装器、函数调用器
+    //多继承	构建 tuple、variant、访问器等
+    //构造器	通用类构造、初始化方法
+    //消息系统	实现观察者、事件分发系统
+    table->addFeature(
+        "可变参数模板",
+        "核心语言增强",
+        "允许模板接受任意数量的模板参数，常用于实现 printf 或 tuple 这类功能。",
+        [](QTextEdit* output){
+            print("hello",1,1.123,'c');  
+        }
+    );
+
     // 智能指针
     table->addFeature(
         u8"智能指针",
