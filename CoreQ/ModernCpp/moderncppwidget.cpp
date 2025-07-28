@@ -195,7 +195,7 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
     // Lambda表达式
     table->addFeature(
         "Lambda",
-        "C plus plus Features",
+        "核心语言增强",
         u8"创建简单的匿名函数,用于就地定义简单的函数",
         [](QTextEdit* output) {
             auto sum = [](int a, int b) { return a + b; };
@@ -208,11 +208,36 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
     
-    
+    // 移动语义
+    table->addFeature(
+        "移动语义",
+        "核心语言增强",
+        "避免不必要的对象拷贝，提高性能",
+        [](QTextEdit* output) {
+            auto now = []() -> QString {
+                return QTime::currentTime().toString("hh:mm:ss.zzz");
+            };
+
+            output->append(QString("开始时间: %1").arg(now()));
+
+            std::vector<std::string> v1(1000000, "测试");
+            output->append(QString("创建大向量 v1，大小: %1").arg(v1.size()));
+
+            output->append(QString("复制前时间: %1").arg(now()));
+            std::vector<std::string> v2 = v1; // 拷贝操作
+            output->append(QString("拷贝完成，v2大小: %1").arg(v2.size()));
+
+            output->append(QString("移动前时间: %1").arg(now()));
+            std::vector<std::string> v3 = std::move(v1); // 移动操作
+            output->append(QString("移动完成，v3大小: %1, v1大小: %2").arg(v3.size()).arg(v1.size()));
+            output->append(QString("结束时间: %1").arg(now()));
+        }
+        );
+
     // 智能指针
     table->addFeature(
         u8"智能指针",
-        "Standard library Update",
+        "STL",
         "Automatic memory management to prevent memory leaks",
         [](QTextEdit* output) {
             // std::unique_ptr示例
@@ -261,7 +286,7 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
     // auto、decltype关键字
     table->addFeature(
         "auto,decltype",
-        "C++ Feature",
+        "新增关键字与标识符",
         "Automatic type derivation and simplified variable declaration",
         [](QTextEdit* output) {
             auto i = 42;  // int
@@ -292,7 +317,7 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
     // 基于范围的for循环
     table->addFeature(
         "基于范围的for循环", 
-        "C++ feature",
+        "语法糖与便利性改进",
         "Simplify container traversal",
         [](QTextEdit* output) {
             std::vector<std::string> fruits = {"苹果", "香蕉", "橙子", "葡萄"};
@@ -306,32 +331,6 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
             for (const auto& fruit : fruits) {
                 output->append(QString("  水果: %1").arg(QString::fromStdString(fruit)));
             }
-        }
-    );
-    
-    // 移动语义
-    table->addFeature(
-        "移动语义", 
-        "C++ feture",
-        "避免不必要的对象拷贝，提高性能", 
-        [](QTextEdit* output) {
-            auto now = []() -> QString { 
-                return QTime::currentTime().toString("hh:mm:ss.zzz"); 
-            };
-            
-            output->append(QString("开始时间: %1").arg(now()));
-            
-            std::vector<std::string> v1(1000000, "测试");
-            output->append(QString("创建大向量 v1，大小: %1").arg(v1.size()));
-            
-            output->append(QString("复制前时间: %1").arg(now()));
-            std::vector<std::string> v2 = v1; // 拷贝操作
-            output->append(QString("拷贝完成，v2大小: %1").arg(v2.size()));
-            
-            output->append(QString("移动前时间: %1").arg(now()));
-            std::vector<std::string> v3 = std::move(v1); // 移动操作
-            output->append(QString("移动完成，v3大小: %1, v1大小: %2").arg(v3.size()).arg(v1.size()));
-            output->append(QString("结束时间: %1").arg(now()));
         }
     );
 }
