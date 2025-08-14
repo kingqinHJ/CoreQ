@@ -12,9 +12,19 @@
 #include <random>
 #include <string>
 
-namespace Modern {
+namespace Modern11 {
     void foo(int n) {}
     void foo(char* p) {}
+
+    class baseClass{
+        virtual void foo()=0;
+        virtual void bar(){}
+    };
+
+    class derived final:baseClass{
+        void foo() override {}
+        //void bar(int a) override {}
+    };
 }
 
 // CppFeatureTable 类实现
@@ -330,7 +340,7 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         "新的空指针常量，解决了之前用 NULL 或 0 带来的类型不安全和重载问题。",
         [](QTextEdit* output) {
             //foo(NULL); // 编译错误：二义性
-            Modern::foo(nullptr); // 正确调用 foo(char*)
+            Modern11::foo(nullptr); // 正确调用 foo(char*)
             output->append(QString("新的空指针常量，解决了之前用 NULL 或 0 带来的类型不安全和重载问题。"));
         }
     );
@@ -366,6 +376,17 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
     
+    //override 和 final
+    table->addFeature(
+        "override 和 final",
+        "新增关键字与标识符",
+        "override: 明确表示一个成员函数是重写基类的虚函数。如果基类没有对应的虚函数，编译器会报错。\n final: 指定一个类不能被继承，或一个虚函数不能被再次重写。",
+        [](QTextEdit* output) {
+            //Modern11::baseClass base;   //error
+            Modern11::derived derived;
+        }
+        );
+
     // 基于范围的for循环
     table->addFeature(
         "基于范围的for循环", 
