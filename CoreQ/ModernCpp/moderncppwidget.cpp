@@ -25,6 +25,23 @@ namespace Modern11 {
         void foo() override {}
         //void bar(int a) override {}
     };
+
+    struct Heavy {
+        std::vector<int> data;
+        Heavy() : data(1000, 42) {}                      // 约 1 KB 的数据
+
+        // ---------- 版本 1：有 noexcept ----------
+        // Heavy(Heavy&& other) noexcept
+        //     : data(std::move(other.data)) {}
+
+        // ---------- 版本 2：没有 noexcept ----------
+        Heavy(Heavy&& other)               // 取消 noexcept
+            : data(std::move(other.data)) {}
+
+        // 禁止拷贝，防止意外 fallback
+        Heavy(const Heavy&) = delete;
+        Heavy& operator=(const Heavy&) = delete;
+    };
 }
 
 // CppFeatureTable 类实现
@@ -386,6 +403,25 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
             Modern11::derived derived;
         }
         );
+
+    //noexcept
+    table->addFeature(
+        "noexcept",
+        "新增关键字与标识符",
+        "用于指定一个函数不会抛出异常。这能给编译器更多优化机会。",
+        [](QTextEdit* output) {
+            const size_t N = 500'000;
+            std::vector<Modern11::Heavy> v;
+            v.reserve(N);   // 预留避免额外分配影响结果
+
+            auto t0 = std::chrono::high_resolution_clock::now();
+            for (size_t i = 0; i < N; ++i) v.emplace_back();
+            auto t1 = std::chrono::high_resolution_clock::now();
+
+            std::chrono::duration<double> sec = t1 - t0;
+           output->append( tr("elapsed: %1s\n").arg(sec.count()));
+        }
+    );
 
     // 基于范围的for循环
     table->addFeature(
