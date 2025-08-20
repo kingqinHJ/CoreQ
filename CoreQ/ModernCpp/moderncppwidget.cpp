@@ -405,6 +405,15 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         );
 
     //noexcept
+    //使用场景
+    //1.析构函数
+    //析构函数在对象销毁时总是 noexcept（标准默认），因为抛异常会导致 std::terminate
+    //2.移动构造函数 / 移动赋值运算符
+    //为了让容器能够安全地使用移动语义，推荐把它们标记为 noexcept（如果内部操作真的不会抛异常）。
+    //3.小的、显然不会抛异常的函数
+    //如只做几次数值计算、返回成员变量的 getter、简单的 constexpr 函数等
+    //4.模板库或通用工具函数
+    //使用条件 noexcept 根据模板参数的特性自动决定是否抛异常。
     table->addFeature(
         "noexcept",
         "新增关键字与标识符",
