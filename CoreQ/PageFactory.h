@@ -5,8 +5,9 @@
 #include "qpromise.h"
 #include "httpwidget.h"
 #include "callbackdemowidget.h"
-#include "jsonwidget.h"
+#include "DataProcess/jsonwidget.h"
 #include "ModernCpp/moderncppwidget.h"
+#include "ThreadingDemo/threadingdemowidget.h"
 
 class PageFactory{
 public:
@@ -18,6 +19,7 @@ public:
         if (type == "Callback") return new CallbackDemoWidget(parent);
         if (type == "Json") return new JsonWidget(parent);
         if (type == "ModernCpp") return new ModernCppWidget(parent);
+        if (type == "ThreadingDemo") return new ThreadingDemoWidget(parent);
         return nullptr;
     }
 };

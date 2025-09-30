@@ -36,6 +36,7 @@ void Widget::setupUI()
     navigationList->addItem(u8"callback");
     navigationList->addItem(u8"JSON操作");
     navigationList->addItem(u8"现代C++");
+    navigationList->addItem(u8"多线程演示");
     // TODO: 添加更多功能项
     
     // 设置主布局
@@ -49,7 +50,7 @@ void Widget::setupUI()
 
 void Widget::createPages()
 {
-    QStringList pageTypes = {"Settings", "Promise", "Http", "Callback", "Json", "ModernCpp"};
+    QStringList pageTypes = {"Settings", "Promise", "Http", "Callback", "Json", "ModernCpp", "ThreadingDemo"};
     for (const QString &type : pageTypes) {
         QWidget *page = PageFactory::CreateWidget(type, this);
         if (page) {

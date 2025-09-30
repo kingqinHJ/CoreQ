@@ -38,6 +38,7 @@ set(PROJECT_SOURCES
 add_subdirectory(DesignPatternsPrinciples)
 add_subdirectory(DataProcess)
 add_subdirectory(ModernCpp)
+add_subdirectory(ThreadingDemo)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(CoreQ
@@ -59,7 +60,6 @@ else()
         add_executable(CoreQ
             ${PROJECT_SOURCES}
             qsetting.h qsetting.cpp
-            qpromise.cpp qpromise.h
             mysrc.qrc
             vcpkg.json
             callbackdemowidget.h callbackdemowidget.cpp
@@ -74,13 +74,14 @@ target_link_libraries(CoreQ PRIVATE
     spdlog::spdlog
 )
 
-target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DataProcess ModernCpp)
+target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DataProcess ModernCpp ThreadingDemo)
 
 target_include_directories(CoreQ PUBLIC
                           "${PROJECT_BINARY_DIR}"
                           "${PROJECT_SOURCE_DIR}/DesignPatternsPrinciples"
                           "${PROJECT_SOURCE_DIR}/DataProcess"
                           "${PROJECT_SOURCE_DIR}/ModernCpp"
+                          "${PROJECT_SOURCE_DIR}/ThreadingDemo"
                           )
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
