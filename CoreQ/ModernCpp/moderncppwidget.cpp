@@ -432,6 +432,57 @@ void ModernCppWidget::setupCpp11Features(CppFeatureTable* table)
         }
     );
 
+    //static_assert 编译时断言,static_assert 是 C++11 引入的编译时断言机制，它在编译期间进行条件检查，
+    //如果条件为 false，编译器会产生错误并停止编译。
+    table->addFeature(
+        "static_assert", 
+        "编译时检查",
+        "Compile-time assertions and validation",
+        [](QTextEdit* output) {
+            output->append("=== static_assert 编译时断言示例 ===\n");
+            
+            // 基本用法示例
+            output->append("1. 基本类型大小检查:");
+            output->append(QString("   sizeof(int) = %1 字节").arg(sizeof(int)));
+            output->append("   static_assert(sizeof(int) >= 4, \"int must be at least 4 bytes\");\n");
+            
+            // 模板参数验证
+            output->append("2. 模板参数验证:");
+            output->append("   template<int N> class Array {");
+            output->append("       static_assert(N > 0, \"Array size must be positive\");");
+            output->append("   };\n");
+            
+            // 类型特性检查
+            output->append("3. 类型特性检查:");
+            output->append("   static_assert(std::is_integral_v<int>, \"int must be integral type\");");
+            output->append("   static_assert(std::is_pointer_v<int*>, \"int* must be pointer type\");\n");
+            
+            // 平台检查
+            output->append("4. 平台兼容性检查:");
+            output->append(QString("   当前指针大小: %1 字节").arg(sizeof(void*)));
+            if (sizeof(void*) == 8) {
+                output->append("   static_assert(sizeof(void*) == 8, \"64-bit platform required\");");
+            } else {
+                output->append("   static_assert(sizeof(void*) == 4, \"32-bit platform detected\");");
+            }
+            output->append("");
+            
+            // 配置验证示例
+            constexpr int MAX_SIZE = 1024;
+            output->append("5. 编译时配置验证:");
+            output->append(QString("   constexpr int MAX_SIZE = %1;").arg(MAX_SIZE));
+            output->append("   static_assert(MAX_SIZE > 0 && MAX_SIZE <= 4096, \"Invalid size\");\n");
+            
+            // C++版本检查
+            output->append("6. C++标准版本检查:");
+            output->append(QString("   当前 C++ 版本: %1").arg(__cplusplus));
+            output->append("   static_assert(__cplusplus >= 201103L, \"C++11 or later required\");\n");
+            
+            output->append("注意: static_assert 在编译时执行，失败会导致编译错误");
+            output->append("优势: 零运行时开销，早期错误发现，清晰的错误信息");
+        }
+    );
+
     // 基于范围的for循环
     table->addFeature(
         "基于范围的for循环", 
@@ -849,4 +900,4 @@ int main() {
             // output->append("4. 提供与std::map相同的接口");
         }
     );
-} 
+}
