@@ -9,6 +9,7 @@ ThreadingDemoWidget::ThreadingDemoWidget(QWidget *parent)
     , navigationList(new QListWidget(this))
     , contentStack(new QStackedWidget(this))
     , promiseDemo(nullptr)
+    , threadDemo(nullptr)
     , welcomePage(new QWidget(this))
     , splitter(new QSplitter(Qt::Horizontal, this))
 {
@@ -110,7 +111,6 @@ void ThreadingDemoWidget::initNavigationList()
     // 预留更多演示项目
     QListWidgetItem *threadItem = new QListWidgetItem("std::thread 演示");
     threadItem->setData(Qt::UserRole, "thread");
-    //threadItem->setEnabled(false); // 暂时禁用，待实现
     navigationList->addItem(threadItem);
     
     QListWidgetItem *mutexItem = new QListWidgetItem("std::mutex 演示");
@@ -198,6 +198,10 @@ void ThreadingDemoWidget::createDemoPages()
     // 创建Promise演示页面
     promiseDemo = new QPromise(this);
     contentStack->addWidget(promiseDemo);
+    
+    // 创建std::thread演示页面
+    threadDemo = new StdThreadWidget(this);
+    contentStack->addWidget(threadDemo);
 }
 
 void ThreadingDemoWidget::initConnections()
@@ -223,6 +227,11 @@ void ThreadingDemoWidget::onNavigationSelectionChanged(QListWidgetItem *current,
     else if (demoType == "promise") {
         if (promiseDemo) {
             contentStack->setCurrentWidget(promiseDemo);
+        }
+    }
+    else if (demoType == "thread") {
+        if (threadDemo) {
+            contentStack->setCurrentWidget(threadDemo);
         }
     }
     // 其他演示类型的处理可以在这里添加
