@@ -170,7 +170,7 @@ void StdThreadWidget::startSingleThread()
     
     int workTime = m_singleWorkTime->value();
     
-    // 创建并启动线程
+    // 创建并启动线程，线程的启动在构造期，不需要“start”。 join / detach 只决定主线程是否等待它或是否分离资源，并不影响是否开始执行。
     m_threads.emplace_back(&StdThreadWidget::singleThreadWork, this, 1, workTime);
     
     addLogSafe(QString("创建线程 ID: %1, 工作时间: %2 秒")

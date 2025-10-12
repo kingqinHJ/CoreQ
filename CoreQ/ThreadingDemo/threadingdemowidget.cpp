@@ -48,18 +48,32 @@ void ThreadingDemoWidget::setupUI()
     navigationList->setMaximumWidth(200);
     navigationList->setStyleSheet(
         "QListWidget {"
-        "    border: 1px solid #bdc3c7;"
-        "    border-radius: 5px;"
-        "    background-color: #ffffff;"
-        "    selection-background-color: #3498db;"
-        "    selection-color: white;"
+        "    border: 1px solid #bdc3c7; /* 保持边框颜色 */"
+        "    border-radius: 5px; /* 保持圆角 */"
+        "    background-color: #ffffff; /* 保持背景色 */"
+        "    outline: none; /* 移除选中时的虚线框，提升美观度 */"
         "}"
+
         "QListWidget::item {"
-        "    padding: 8px;"
-        "    border-bottom: 1px solid #ecf0f1;"
+        "    padding: 10px 12px; /* 增加垂直和水平内边距，提升视觉舒适度 */"
+        "    border-bottom: 1px solid #ecf0f1; /* 保持分隔线 */"
+        "    color: #333333; /* 默认文字颜色，比纯黑更柔和 */"
         "}"
+
         "QListWidget::item:hover {"
-        "    background-color: #e8f4fd;"
+        "    background-color: #f0f0f0; /* 悬停背景色改为浅灰色，更柔和 */"
+        "    color: #333333; /* 悬停时文字颜色保持默认 */"
+        "}"
+
+        "QListWidget::item:selected {"
+        "    background-color: #3498db; /* 选中项背景色保持蓝色 */"
+        "    color: #ffffff; /* **优化：选中项文字颜色改为白色，提高可读性** */"
+        "}"
+
+        // 可选：如果希望选中项在悬停时有不同效果，可以添加
+        "QListWidget::item:selected:hover {"
+        "    background-color: #2980b9; /* 选中项在悬停时，背景色稍微变深 */"
+        "    color: #ffffff;"
         "}"
     );
     
