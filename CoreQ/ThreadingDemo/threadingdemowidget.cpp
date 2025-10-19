@@ -216,6 +216,10 @@ void ThreadingDemoWidget::createDemoPages()
     // 创建std::thread演示页面
     threadDemo = new StdThreadWidget(this);
     contentStack->addWidget(threadDemo);
+
+    // 创建std::thread演示页面
+    mutexDemo = new MutexDemoWidget(this);
+    contentStack->addWidget(mutexDemo);
 }
 
 void ThreadingDemoWidget::initConnections()
@@ -246,6 +250,11 @@ void ThreadingDemoWidget::onNavigationSelectionChanged(QListWidgetItem *current,
     else if (demoType == "thread") {
         if (threadDemo) {
             contentStack->setCurrentWidget(threadDemo);
+        }
+    }
+    else if (demoType == "mutex") {
+        if (mutexDemo) {
+            contentStack->setCurrentWidget(mutexDemo);
         }
     }
     // 其他演示类型的处理可以在这里添加

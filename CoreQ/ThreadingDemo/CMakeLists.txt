@@ -5,6 +5,8 @@ add_library(ThreadingDemo
     stdthreadwidget.cpp
     threadingdemowidget.h
     threadingdemowidget.cpp
+    mutexdemowidget.h
+    mutexdemowidget.cpp
 )
 
 target_link_libraries(ThreadingDemo PRIVATE Qt5::Core Qt5::Widgets)

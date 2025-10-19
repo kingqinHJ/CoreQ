@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include "qpromise.h"
 #include "stdthreadwidget.h"
+#include "mutexdemowidget.h"
 
 /**
  * @brief ThreadingDemoWidget类 - C++多线程技术演示主界面
@@ -84,8 +85,9 @@ private:
     
     // 演示页面
     QPromise *promiseDemo;          ///< Promise/Future演示页面
-    StdThreadWidget *threadDemo;  ///< std::thread演示页面
-    QWidget *welcomePage;           ///< 欢迎页面
+    StdThreadWidget *threadDemo;    ///< std::thread演示页面
+     MutexDemoWidget *mutexDemo;      ///< std::mutex演示页面
+     QWidget *welcomePage;            ///< 欢迎页面
     
     // 样式和布局
     QSplitter *splitter;            ///< 分割器，调整左右比例

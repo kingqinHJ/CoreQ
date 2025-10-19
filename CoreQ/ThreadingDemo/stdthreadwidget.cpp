@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include <algorithm>
 #include <random>
+#include <cmath>
 
 StdThreadWidget::StdThreadWidget(QWidget *parent)
     : QWidget(parent)
@@ -243,28 +244,45 @@ void StdThreadWidget::clearLog()
 
 void StdThreadWidget::updateUI()
 {
-    // 线程安全地更新UI
-    std::lock_guard<std::mutex> lock(m_uiMutex);
-    
-    if (!m_pendingLogs.isEmpty()) {
-        m_logDisplay->append(m_pendingLogs);
-        m_pendingLogs.clear();
-        
-        // 自动滚动到底部
-        QScrollBar* scrollBar = m_logDisplay->verticalScrollBar();
-        scrollBar->setValue(scrollBar->maximum());
+    {
+        // 线程安全地提取待显示日志
+        std::lock_guard<std::mutex> lock(m_uiMutex);
+        if (!m_pendingLogs.isEmpty()) {
+            m_logDisplay->append(m_pendingLogs);
+            m_pendingLogs.clear();
+            // 自动滚动到底部
+            QScrollBar* scrollBar = m_logDisplay->verticalScrollBar();
+            scrollBar->setValue(scrollBar->maximum());
+        }
     }
-    
-    // 更新进度
-    if (m_isRunning && m_totalTasks > 1) {
+
+    // 更新进度与状态
+    if (m_isRunning) {
+        int total = m_totalTasks.load();
         int completed = m_completedTasks.load();
-        m_progressBar->setValue(completed);
-        m_statusLabel->setText(QString("多线程运行中... (%1/%2)")
-                              .arg(completed).arg(m_totalTasks.load()));
-        
-        // 检查是否所有任务完成
-        if (completed >= m_totalTasks) {
-            stopAllThreads();
+
+        if (total > 1) {
+            // 多线程模式
+            m_progressBar->setValue(completed);
+            m_statusLabel->setText(QString("多线程运行中... (%1/%2)")
+                                   .arg(completed).arg(total));
+
+            // 所有任务完成后，统一走停止流程
+            if (completed >= total) {
+                stopAllThreads();
+            }
+        } else {
+            // 单线程模式：完成后恢复UI
+            if (completed >= 1) {
+                joinAllThreads();
+                m_isRunning = false;
+                m_startSingleBtn->setEnabled(true);
+                m_startMultiBtn->setEnabled(true);
+                m_stopBtn->setEnabled(false);
+                m_progressBar->setVisible(false);
+                m_statusLabel->setText("单线程已完成");
+                addLogSafe("单线程任务已完成");
+            }
         }
     }
 }
@@ -304,36 +322,37 @@ void StdThreadWidget::multiThreadWork(int threadId, int iterations)
 {
     addLogSafe(QString("[线程 %1] 开始执行 %2 次迭代")
                .arg(threadId).arg(iterations));
-    
+
     auto startTime = std::chrono::steady_clock::now();
-    
+
     // 模拟计算密集型任务
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 1.0);
-    
+
     double result = 0.0;
+    int step = std::max(1, iterations / 10);
     for (int i = 0; i < iterations && !m_stopFlag; ++i) {
         // 模拟一些计算
         result += std::sin(dis(gen)) * std::cos(dis(gen));
-        
-        // 每完成10%报告一次进度
-        if (i % (iterations / 10) == 0 && i > 0) {
+
+        // 每完成固定步长报告一次进度（避免除以0）
+        if (i % step == 0 && i > 0) {
             addLogSafe(QString("[线程 %1] 进度: %2% (结果: %3)")
                        .arg(threadId)
                        .arg(i * 100 / iterations)
                        .arg(result, 0, 'f', 2));
         }
-        
+
         // 偶尔让出CPU时间
         if (i % 100 == 0) {
             std::this_thread::yield();
         }
     }
-    
+
     auto endTime = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-    
+
     if (m_stopFlag) {
         addLogSafe(QString("[线程 %1] 被中断停止，运行时间: %2 ms")
                    .arg(threadId).arg(duration.count()));
@@ -341,7 +360,7 @@ void StdThreadWidget::multiThreadWork(int threadId, int iterations)
         addLogSafe(QString("[线程 %1] 完成所有迭代，最终结果: %2，运行时间: %3 ms")
                    .arg(threadId).arg(result, 0, 'f', 2).arg(duration.count()));
     }
-    
+
     m_completedTasks++;
 }
 
