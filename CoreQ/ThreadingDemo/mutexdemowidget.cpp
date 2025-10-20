@@ -1,6 +1,8 @@
 #include "mutexdemowidget.h"
 #include <QScrollBar>
 #include <QDateTime>
+#include <thread>
+#include <vector>
 
 MutexDemoWidget::MutexDemoWidget(QWidget* parent)
     : QWidget(parent)
@@ -141,16 +143,52 @@ void MutexDemoWidget::startUnlockedCount()
         const int itertionsPerThread=200000;
         const int expected=threadCount*itertionsPerThread;
 
-        int sharedCounter=0;
+        int sharedCounter=0;  // 故意未加锁，制造数据竞争
 
         std::vector<std::thread> workers;
-        worker.reserve(threadCount);
+        workers.reserve(threadCount);
 
         for(int t=0;t<threadCount;++t)
         {
-            workers.emplace_back
+            workers.emplace_back([this,&sharedCounter,itertionsPerThread]{// 读-改-写，存在数据竞争
+                for(int i=0;i<itertionsPerThread;++i)
+                {
+                    if(m_stopRequested) // 支持取消
+                        break;
+
+                    sharedCounter++;  
+                    if((i%10000)==0)
+                    {
+                        std::this_thread::yield();  // 让出时间片，提升公平性
+                    }    
+                }
+
+            });
         }
 
+        for(auto &th:workers){
+            th.join();
+        }
+
+        const int actual=sharedCounter;
+
+        // 回到UI线程安全更新界面
+        QMetaObject::invokeMethod(this, [this, expected, actual] {
+            // 退出运行状态（统一复位）
+            m_progressBar->setRange(0, 100);
+            m_progressBar->setValue(100);
+            m_statusLabel->setText("无锁计数演示完成");
+            m_stopBtn->setEnabled(false);
+            m_startUnlockedBtn->setEnabled(true);
+            m_startMutexBtn->setEnabled(true);
+            m_startAtomicBtn->setEnabled(true);
+            m_startRWBtn->setEnabled(true);
+            m_startDeadlockBtn->setEnabled(true);
+            m_isRunning = false;
+
+            addLogUnsafe(QString("结束：期望=%1，实际=%2，差异=%3")
+                         .arg(expected).arg(actual).arg(expected - actual));
+        }, Qt::QueuedConnection);
     }).detach();
 }
 

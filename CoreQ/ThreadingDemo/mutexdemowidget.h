@@ -74,6 +74,7 @@ private:
     QTimer* m_updateTimer{};
     QString m_pendingLogs;
     bool m_isRunning{false};
+    bool m_stopRequested{false};
 };
 
 #endif // MUTEXDEMOWIDGET_H
