@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 MutexDemoWidget::MutexDemoWidget(QWidget* parent)
     : QWidget(parent)
@@ -194,18 +195,66 @@ void MutexDemoWidget::startUnlockedCount()
 
 void MutexDemoWidget::startMutexCount()
 {
+    // 进入运行状态（保留并复用这段UI/状态保护逻辑）
     if (m_isRunning) return;
     m_isRunning = true;
-    m_statusLabel->setText("std::mutex计数演示（占位）运行中...");
+    m_stopRequested = false; // 建议定义为 std::atomic<bool> m_stopRequested{false};
+    m_statusLabel->setText("互斥锁计数演示运行中...");
     m_progressBar->setVisible(true);
-    m_progressBar->setRange(0, 0);
+    m_progressBar->setRange(0, 0); // 不确定态：旋转指示
     m_stopBtn->setEnabled(true);
     m_startUnlockedBtn->setEnabled(false);
     m_startMutexBtn->setEnabled(false);
     m_startAtomicBtn->setEnabled(false);
     m_startRWBtn->setEnabled(false);
     m_startDeadlockBtn->setEnabled(false);
-    addLogUnsafe("启动：使用std::mutex的共享计数（占位）。");
+    addLogUnsafe("启动：互斥锁保护下的共享计数。锁保证正确性，但有开销。");
+
+    std::thread([this]{
+        const int threadCount=8;
+        const int iterationPerThread=200000;
+        const int expected=threadCount*iterationPerThread;
+
+        int sharedCounter=0;
+        std::mutex counterMutex;
+        
+        std::vector<std::thread> workers;
+        workers.reserve(threadCount);
+
+        for(int t=0;t<threadCount;++t){
+            workers.emplace_back([&,this]{
+                for(int i=0;i<iterationPerThread;++i){
+                    if(m_stopRequested)
+                        break;
+                    {
+                        std::lock_guard<std::mutex> lk(counterMutex);
+                            ++sharedCounter;
+                    }
+
+                    if((i%10000)==0){
+                        std::this_thread::yield();
+                    }
+                }
+            });
+        }
+
+        for(auto &th:workers)
+                th.join();
+        const int actual=sharedCounter;
+        QMetaObject::invokeMethod(this,[this,expected,actual]{
+            m_progressBar->setRange(0, 100);
+            m_progressBar->setValue(100);
+            m_statusLabel->setText("互斥锁计数演示完成");
+            m_stopBtn->setEnabled(false);
+            m_startUnlockedBtn->setEnabled(true);
+            m_startMutexBtn->setEnabled(true);
+            m_startAtomicBtn->setEnabled(true);
+            m_startRWBtn->setEnabled(true);
+            m_startDeadlockBtn->setEnabled(true);
+            m_isRunning = false;
+            addLogUnsafe(QString("结束：期望=%1，实际=%2（锁保证正确性）").arg(expected).arg(actual));
+        },Qt::QueuedConnection);
+    }).detach();
 }
 
 void MutexDemoWidget::startAtomicCount()
