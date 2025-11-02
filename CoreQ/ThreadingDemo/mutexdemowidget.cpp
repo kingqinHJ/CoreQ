@@ -257,20 +257,72 @@ void MutexDemoWidget::startMutexCount()
     }).detach();
 }
 
+//使用 std::atomic（非同步，只是安全）
 void MutexDemoWidget::startAtomicCount()
 {
+    // 进入运行状态（建议保留并复用）
     if (m_isRunning) return;
     m_isRunning = true;
-    m_statusLabel->setText("std::atomic计数演示（占位）运行中...");
+    m_stopRequested = false; // 建议定义为 std::atomic<bool> m_stopRequested{false};
+    m_statusLabel->setText("原子计数演示运行中...");
     m_progressBar->setVisible(true);
-    m_progressBar->setRange(0, 0);
+    m_progressBar->setRange(0, 0); // 不确定态：旋转指示
     m_stopBtn->setEnabled(true);
     m_startUnlockedBtn->setEnabled(false);
     m_startMutexBtn->setEnabled(false);
     m_startAtomicBtn->setEnabled(false);
     m_startRWBtn->setEnabled(false);
     m_startDeadlockBtn->setEnabled(false);
-    addLogUnsafe("启动：使用std::atomic的共享计数（占位）。");
+    addLogUnsafe("启动：std::atomic 保护下的共享计数。无锁但无数据竞争。");
+
+    // 后台管理线程，避免阻塞UI线程
+    std::thread([this] {
+        const int threadCount = 8;
+        const int iterationsPerThread = 200000;
+        const int expected = threadCount * iterationsPerThread;
+
+        std::atomic<int> sharedCounter(0);
+        std::vector<std::thread> workers;
+        workers.reserve(threadCount);
+        for(int t=0;t<threadCount;++t)
+        {
+            workers.emplace_back([&,this]{
+                for(int i=0;i<iterationsPerThread;++i)
+                {
+                    if(m_stopRequested) break;
+                    //方式一：递增运算符
+                    ++sharedCounter;
+                    //sharedCounter.fetch_add(1,std::memory_order_relaxed);
+                    if(i%10000==0)
+                    {
+                        std::this_thread::yield();
+                    }
+                }
+            });
+        }
+
+        for(auto &th:workers)
+            th.join();
+
+        const int actual=sharedCounter.load(std::memory_order_relaxed);
+
+        QMetaObject::invokeMethod(this,[this,expected,actual]{
+            m_progressBar->setRange(0, 100);
+            m_progressBar->setValue(100);
+            m_statusLabel->setText("原子计数演示完成");
+            m_stopBtn->setEnabled(false);
+            m_startUnlockedBtn->setEnabled(true);
+            m_startMutexBtn->setEnabled(true);
+            m_startAtomicBtn->setEnabled(true);
+            m_startRWBtn->setEnabled(true);
+            m_startDeadlockBtn->setEnabled(true);
+            m_isRunning = false;
+
+            addLogUnsafe(QString("结束：期望=%1，实际=%2（原子操作保证正确性）")
+                         .arg(expected).arg(actual));
+        }, Qt::QueuedConnection);
+    }).detach();
+
 }
 
 void MutexDemoWidget::startReadersWriters()
