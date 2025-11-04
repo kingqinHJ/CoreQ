@@ -124,6 +124,13 @@ void MutexDemoWidget::initUI()
 }
 
 // 占位：不执行真实并发，仅调整UI并输出日志
+/*实现说明
+
+- 运行方式：在后台启动一个“管理线程”，该线程再创建 threadCount 个工作线程，每个线程对同一个 sharedCounter 做 iterationsPerThread 次自增。
+- 结果预期：理论上总增量应为 expected = 线程数 × 每线程迭代次数 ，但由于未加锁，多个线程会并发执行“读-改-写”，导致丢增量，实际值通常小于期望值。
+- UI安全性：所有界面更新通过 QMetaObject::invokeMethod(..., Qt::QueuedConnection) 回到主线程执行，避免直接从 std::thread 触碰 Qt UI。
+- yield 作用：每过一段迭代让出时间片，可减少单线程长时间占用 CPU，提升整体公平性；对结果不产生本质影响。
+*/
 void MutexDemoWidget::startUnlockedCount()
 {
     if (m_isRunning) return;
@@ -193,6 +200,15 @@ void MutexDemoWidget::startUnlockedCount()
     }).detach();
 }
 
+/*实现说明
+
+- 互斥保护：用 std::mutex 配合 std::lock_guard 将 sharedCounter++ 包裹在临界区内，保证“读-改-写”的原子性，消除数据竞争。
+- 正确性预期：最终 actual 应严格等于 expected = 线程数 × 每线程迭代次数 ，与无锁版本相比不再丢增量。
+- UI线程安全：后台线程完成后通过 QMetaObject::invokeMethod(..., Qt::QueuedConnection) 回到主线程更新控件与日志。
+- 捕获列表：工作线程 lambda 使用 [&, this] ，默认按引用捕获局部变量，并显式捕获 this ；避免“无法隐式捕获”错误。
+- 让出时间片： yield() 不是必须，仅用于调度公平性；可移除以提升吞吐。
+- 取消建议：在“停止”按钮槽里将 m_stopRequested = true ，工作线程循环检查后尽快退出
+*/
 void MutexDemoWidget::startMutexCount()
 {
     // 进入运行状态（保留并复用这段UI/状态保护逻辑）
@@ -256,7 +272,13 @@ void MutexDemoWidget::startMutexCount()
         },Qt::QueuedConnection);
     }).detach();
 }
+/*
+实现说明
 
+- 使用 std::atomic<int> 作为共享计数器，所有线程对其执行原子自增，避免数据竞争。
+- 通过后台管理线程创建多个工作线程，UI 不被阻塞；结束后用 QMetaObject::invokeMethod(..., Qt::QueuedConnection) 回到主线程更新控件与日志。
+- 在原子演示中， actual 应等于 expected = 线程数 × 每线程迭代次数 ，与无锁版本对比可以看到不再丢增量。
+*/
 //使用 std::atomic（非同步，只是安全）
 void MutexDemoWidget::startAtomicCount()
 {
@@ -392,3 +414,8 @@ void MutexDemoWidget::addLogUnsafe(const QString& msg)
     const QString ts = QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     m_pendingLogs += QString("[%1] %2\n").arg(ts, msg);
 }
+
+
+//QT的线程同步、C++官方的线程同步方式
+//QT时间循环、使用信号量进行同步等待，
+//C++
