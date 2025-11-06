@@ -4,6 +4,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <shared_mutex>
 
 MutexDemoWidget::MutexDemoWidget(QWidget* parent)
     : QWidget(parent)
@@ -347,20 +348,118 @@ void MutexDemoWidget::startAtomicCount()
 
 }
 
+/**
+ * 读写示例：使用 std::shared_mutex 展示“多读共享、写独占”的并发访问模式。
+ * - 多个读线程可同时持有共享锁（shared_lock）读取数据；
+ * - 写线程需要获取独占锁（unique_lock）才能修改数据，写期间读会被阻塞；
+ * - 相比用 std::mutex 全部独占，shared_mutex 能提升读多写少场景的吞吐。
+ * 注意：
+ * - UI 控件更新必须回到主线程（通过 QMetaObject::invokeMethod）；
+ * - 建议使用 std::atomic<bool> m_stopRequested 来支持取消；
+ * - 确保工程启用 C++17（shared_mutex 需要）。
+ */
 void MutexDemoWidget::startReadersWriters()
 {
+    // 进入运行状态（UI与状态保护逻辑，建议保留并复用）
     if (m_isRunning) return;
     m_isRunning = true;
-    m_statusLabel->setText("读者-写者演示（占位）运行中...");
+    m_stopRequested = false; // 建议类里定义：std::atomic<bool> m_stopRequested{false};
+    m_statusLabel->setText("读写演示运行中...");
     m_progressBar->setVisible(true);
-    m_progressBar->setRange(0, 0);
+    m_progressBar->setRange(0, 0); // 不确定态：旋转指示
     m_stopBtn->setEnabled(true);
     m_startUnlockedBtn->setEnabled(false);
     m_startMutexBtn->setEnabled(false);
     m_startAtomicBtn->setEnabled(false);
     m_startRWBtn->setEnabled(false);
     m_startDeadlockBtn->setEnabled(false);
-    addLogUnsafe("启动：读者-写者演示（占位）。");
+    addLogUnsafe("启动：shared_mutex 支持多读共享、写独占。读多写少场景提升吞吐。");
+
+    std::thread([this]{
+        // 共享数据与并发原语
+        std::vector<int> data;
+        data.reserve(1000);
+        std::shared_mutex rxMutex;      // 读共享、写独占的读写锁
+        std::atomic<int> readCount(0);    // 统计读操作次数
+        std::atomic<int> writeCount(0);    // 统计写操作次数
+
+        const int readerCount=6;
+        const int writerCount=2;
+        const int iterationsPerReader=150000;
+        const int iterationsPerWriter=40000;
+
+        std::vector<std::thread> readers;
+        std::vector<std::thread> workers;
+        readers.reserve(readerCount);
+        workers.reserve(writerCount);
+
+        // 创建读线程：使用 shared_lock 允许并发读取
+        for(int r=0;r<readerCount;++r)
+        {
+            readers.emplace_back([&,this]{
+                for(int i=0;i<iterationsPerReader;++i)
+                {
+                    if(m_stopRequested) break;
+                    // 读共享锁：多个读者可同时持有
+                    std::shared_lock<std::shared_mutex> lock(rxMutex);
+                    
+                    // 模拟读取：查看大小或最后元素（这里用大小即可）
+                    int sizeSnapshot=static_cast<int>(data.size());
+                    (void)sizeSnapshot;
+
+                    ++readCount;
+
+                    if(i%20000==0)
+                    {
+                        std::this_thread::yield();
+                    }
+                }
+            });
+        }
+
+        // 创建写线程：使用 unique_lock 独占修改
+        for(int w=0;w<writerCount;++w)
+        {
+            workers.emplace_back([&,this]{
+                for(int i=0;i<iterationsPerWriter;++i)
+                {
+                    if(m_stopRequested) break;
+                    // 写独占锁：写期间阻塞读与其他写
+                    std::unique_lock<std::shared_mutex> lock(rxMutex);                    
+                    data.push_back(i);   // 修改共享数据（示例：追加元素
+                    ++writeCount;
+
+                    if(i%5000==0)
+                    {
+                        std::this_thread::yield();
+                    }
+                }
+            });
+        }
+
+        for(auto &t:readers)  t.join();
+        for(auto &t:workers)  t.join();
+        const int totalReads=readCount.load(std::memory_order_relaxed);
+        const int totalWrites=writeCount.load(std::memory_order_relaxed);
+        const int finalSize=static_cast<int>(data.size());
+
+        QMetaObject::invokeMethod(this, [this, totalReads, totalWrites, finalSize] {
+            m_progressBar->setRange(0, 100);
+            m_progressBar->setValue(100);
+            m_statusLabel->setText("读写演示完成");
+            m_stopBtn->setEnabled(false);
+            m_startUnlockedBtn->setEnabled(true);
+            m_startMutexBtn->setEnabled(true);
+            m_startAtomicBtn->setEnabled(true);
+            m_startRWBtn->setEnabled(true);
+            m_startDeadlockBtn->setEnabled(true);
+            m_isRunning = false;
+
+            addLogUnsafe(QString("结束：读次数=%1，写次数=%2，最终数据量=%3（shared_mutex 保障一致性）")
+                         .arg(totalReads).arg(totalWrites).arg(finalSize));
+        }, Qt::QueuedConnection);
+
+    }).detach();
 }
 
 void MutexDemoWidget::startDeadlockDemo()
