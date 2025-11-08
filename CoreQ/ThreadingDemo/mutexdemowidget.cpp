@@ -462,6 +462,24 @@ void MutexDemoWidget::startReadersWriters()
     }).detach();
 }
 
+/**
+ * 函数：MutexDemoWidget::startDeadlockDemo
+ * 作用：演示“两个互斥锁交叉获取”导致的死锁风险，并展示两种安全解法。
+ * 步骤：
+ * 1) 设置UI进入运行态，避免重复启动；
+ * 2) 使用两个 `std::timed_mutex` 启动两条线程，分别以相反顺序获取锁：
+ *    - T1: 先锁 A，再尝试锁 B；
+ *    - T2: 先锁 B，再尝试锁 A；
+ *    为了避免真的挂死，使用 `try_lock_for` 设置超时，以“超时”来识别潜在死锁；
+ * 3) 展示正确解法：
+ *    - 解法一：使用 `std::scoped_lock(a, b)` 一次性获取多个互斥锁；
+ *    - 解法二（说明在解释中）：固定锁顺序或使用 `std::lock(a, b) + std::adopt_lock`。
+ * 4) 回到UI线程更新状态与日志。
+ * 说明：
+ * - 为了安全演示，这里使用 `std::timed_mutex` + `try_lock_for` 避免真实的无限阻塞；
+ * - 所有UI控件更新都通过 `QMetaObject::invokeMethod` 回到主线程；
+ * - 建议类中有 `std::atomic<bool> m_stopRequested{false};`，用于停止演示。
+ */
 void MutexDemoWidget::startDeadlockDemo()
 {
     if (m_isRunning) return;
@@ -476,6 +494,92 @@ void MutexDemoWidget::startDeadlockDemo()
     m_startRWBtn->setEnabled(false);
     m_startDeadlockBtn->setEnabled(false);
     addLogUnsafe("启动：死锁/避免演示（占位）。");
+
+    std::thread([this]{
+        using namespace std::chrono_literals;
+        auto postLog=[this](const QString& msg)
+        {
+            QMetaObject::invokeMethod(this, [this, msg] {
+                addLogUnsafe(msg);
+            }, Qt::QueuedConnection);
+        };
+
+        // 演示死锁风险：两个 timed_mutex，交叉获取，使用 try_lock_for 来“超时检测”
+        std::timed_mutex lock_a;
+        std::timed_mutex lock_b;
+
+        std::thread t1([&,this]{
+            // T1：先A后B
+            std::unique_lock<std::timed_mutex> lock_a_guard(lock_a, std::defer_lock);
+            if(!lock_a_guard.try_lock_for(500ms))
+            {
+                postLog("T1：超时等待A锁失败，可能死锁风险。");
+                return;
+            }
+            postLog("T1：成功获取A锁。");
+            std::this_thread::sleep_for(100ms);  // 故意制造交叉窗口
+            std::unique_lock<std::timed_mutex> lock_b_guard(lock_b, std::defer_lock);
+            if(!lock_b_guard.try_lock_for(500ms))
+            {
+                postLog("T1：超时等待B锁失败，可能死锁风险。");
+                return;
+            }
+            postLog("T1：成功获取 A 与 B（此次未发生死锁）。");
+        });
+
+        std::thread t2([&,this]{
+            // T2：先B后A
+            std::unique_lock<std::timed_mutex> lock_b_guard(lock_b, std::defer_lock);
+            if(!lock_b_guard.try_lock_for(500ms))
+            {
+                postLog("T2：超时等待B锁失败，可能死锁风险。");
+                return;
+            }
+            postLog("T2：成功获取B锁。");
+            std::this_thread::sleep_for(100ms);  // 故意制造交叉窗口
+            std::unique_lock<std::timed_mutex> lock_a_guard(lock_a, std::defer_lock);
+            if(!lock_a_guard.try_lock_for(500ms))
+            {
+                postLog("T2：超时等待A锁失败，可能死锁风险。");
+                return;
+            }
+            postLog("T2：成功获取 B 与 A（此次未发生死锁）。");
+        });
+
+        t1.join();
+        t2.join();
+
+        std::mutex safe_a;
+        std::mutex safe_b;
+        std::thread s1([&,this]{
+            std::scoped_lock lock(safe_a, safe_b);
+            postLog("S1：成功获取A锁和B锁。");
+            std::this_thread::sleep_for(50ms);
+        });
+
+        std::thread s2([&,this]{
+            std::scoped_lock lock(safe_b, safe_a);
+            postLog("S2：成功获取B锁和A锁。");
+            std::this_thread::sleep_for(50ms);
+        });
+        s1.join();
+        s2.join();
+
+        QMetaObject::invokeMethod(this, [this] {
+            m_progressBar->setRange(0, 100);
+            m_progressBar->setValue(100);
+            m_statusLabel->setText("死锁演示完成");
+            m_stopBtn->setEnabled(false);
+            m_startUnlockedBtn->setEnabled(true);
+            m_startMutexBtn->setEnabled(true);
+            m_startAtomicBtn->setEnabled(true);
+            m_startRWBtn->setEnabled(true);
+            m_startDeadlockBtn->setEnabled(true);
+            m_isRunning = false;
+
+            addLogUnsafe("结束：已演示死锁触发条件与两种解决方案。");
+        }, Qt::QueuedConnection);
+    }).detach();
 }
 
 void MutexDemoWidget::stopAll()
