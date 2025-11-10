@@ -549,6 +549,7 @@ void MutexDemoWidget::startDeadlockDemo()
         t1.join();
         t2.join();
 
+        // 正确解法演示1：scoped_lock 一次性获取多个互斥锁，避免交叉顺序死锁
         std::mutex safe_a;
         std::mutex safe_b;
         std::thread s1([&,this]{
@@ -565,6 +566,29 @@ void MutexDemoWidget::startDeadlockDemo()
         s1.join();
         s2.join();
 
+        std::mutex  safe2_a;
+        std::mutex  safe2_b;
+
+        std::thread s3([&,this]{
+            std::unique_lock<std::mutex> lk_a(safe2_a, std::defer_lock);
+            std::unique_lock<std::mutex> lk_b(safe2_b, std::defer_lock);
+
+            std::lock(lk_a, lk_b);
+            postLog("S3：使用 std::lock(A,B) + adopt_lock 同时获取两个锁，避免死锁。");
+            std::this_thread::sleep_for(50ms);
+        });
+        
+        std::thread s4([&,this]{
+            std::unique_lock<std::mutex> lk_a(safe2_a, std::defer_lock);
+            std::unique_lock<std::mutex> lk_b(safe2_b, std::defer_lock);
+
+            std::lock(lk_a, lk_b);
+            postLog("S4：使用 std::lock(A,B) + adopt_lock 同时获取两个锁，避免死锁。");
+            std::this_thread::sleep_for(50ms);
+        });
+        s3.join();
+        s4.join();
+        
         QMetaObject::invokeMethod(this, [this] {
             m_progressBar->setRange(0, 100);
             m_progressBar->setValue(100);
