@@ -8,6 +8,10 @@
 #include "DataProcess/jsonwidget.h"
 #include "ModernCpp/moderncppwidget.h"
 #include "ThreadingDemo/threadingdemowidget.h"
+#include "MVxDemo/mvcwidget.h"
+#include "MVxDemo/mvpwidget.h"
+#include "MVxDemo/mvvmwidget.h"
+#include "MVxDemo/mvxdemowidget.h"
 
 class PageFactory{
 public:
@@ -20,6 +24,7 @@ public:
         if (type == "Json") return new JsonWidget(parent);
         if (type == "ModernCpp") return new ModernCppWidget(parent);
         if (type == "ThreadingDemo") return new ThreadingDemoWidget(parent);
+        if (type == "MVxDemo") return new MVxDemoWidget(parent);
         return nullptr;
     }
 };
