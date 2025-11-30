@@ -102,6 +102,7 @@ void MVPWidget::initPresenter()
         // 1. 更新 Dial (需要 float -> int)
         // QDial/QSlider 是整数控件，这里简单的转换可能会丢失精度，
         // 实际项目中可能需要 multiplier (如 value * 100)
+        // QSignalBlocker 的作用就是 在一个作用域（scope）里临时禁止某个 QObject 发射信号，并在离开作用域时 自动恢复原来的状态。
         {
             QSignalBlocker blocker(m_dialView); // 防止循环信号 (View -> Model -> View)
             m_dialView->setValue(static_cast<int>(val));
