@@ -3,6 +3,7 @@ add_library(MVxDemo
     mvcwidget.cpp
     mvpwidget.h
     mvpwidget.cpp
+    SimpleModel.h
     mvvmwidget.h
     mvvmwidget.cpp
     mvxdemowidget.h
@@ -16,3 +17,4 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
 endif()
+
