@@ -55,6 +55,13 @@ private slots:
      */
     void checkResult();
 
+    /**
+     * @brief 同步方式演示：阻塞式获取结果
+     * 使用 std::future::get() 直接在主线程等待后台线程设置结果，
+     * 演示同步用法的行为特点与对 UI 响应性的影响。
+     */
+    void startComputationSync();
+
 signals:
     /**
      * @brief 进度更新信号
@@ -89,6 +96,7 @@ private:
 
     // UI控件
     QPushButton *startButton;    ///< 开始计算按钮
+    QPushButton *syncButton;     ///< 同步演示按钮（阻塞式获取结果）
     QProgressBar *progressBar;   ///< 进度条，显示计算进度
     QLabel *resultLabel;         ///< 结果标签，显示计算结果或状态
     QVBoxLayout *mainLayout;     ///< 主布局管理器
