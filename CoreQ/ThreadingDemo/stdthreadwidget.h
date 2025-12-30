@@ -16,7 +16,7 @@
 #include <chrono>
 #include <vector>
 #include <mutex>
-
+#include <future>
 /**
  * @class StdThreadWidget
  * @brief std::thread 演示类 - C++11标准线程库的使用示例
@@ -89,6 +89,11 @@ private slots:
      */
     void updateUI();
 
+    /**
+    * @brief 启动异步扩展演示，使用 std::async 和错误处理
+    */
+    void startAsyncExtension();
+
 private:
     /**
      * @brief 初始化用户界面
@@ -119,7 +124,7 @@ private:
      * @brief 等待所有线程完成
      */
     void joinAllThreads();
-
+    
 private:
     // UI组件
     QPushButton* m_startSingleBtn;      ///< 启动单线程按钮
@@ -155,6 +160,10 @@ private:
     // 状态管理
     bool m_isRunning;                   ///< 是否正在运行
     QString m_pendingLogs;              ///< 待显示的日志
+
+    QPushButton* m_startAsyncBtn;       ///< 异步启动按钮
+    QLabel* m_errorLogLabel;            ///< 错误日志标签
+    std::future<int> m_asyncFuture;     ///< 异步操作结果
 };
 
 #endif // STDTHREADWIDGET_H

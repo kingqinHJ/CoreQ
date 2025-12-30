@@ -48,8 +48,11 @@ void StdThreadWidget::initUI()
     
     m_startSingleBtn = new QPushButton("启动单线程任务");
     singleLayout->addWidget(m_startSingleBtn);
-    singleLayout->addStretch();
+    //singleLayout->addStretch();
     
+    m_startAsyncBtn =new QPushButton("启动异步拓展");
+    singleLayout->addWidget(m_startAsyncBtn);
+    singleLayout->addStretch();
     // 多线程演示组
     m_multiThreadGroup = new QGroupBox("多线程演示", this);
     auto* multiLayout = new QHBoxLayout(m_multiThreadGroup);
@@ -90,6 +93,10 @@ void StdThreadWidget::initUI()
     statusLayout->addWidget(m_statusLabel);
     statusLayout->addWidget(m_progressBar);
     
+    m_errorLogLabel = new QLabel("错误日志:无");
+    statusLayout->addWidget(m_errorLogLabel);
+    connect(m_startAsyncBtn, &QPushButton::clicked, this, &StdThreadWidget::startAsyncExtension);
+
     // 日志显示组
     m_logGroup = new QGroupBox("执行日志", this);
     auto* logLayout = new QVBoxLayout(m_logGroup);
@@ -285,6 +292,22 @@ void StdThreadWidget::updateUI()
             }
         }
     }
+
+    if(m_asyncFuture.valid()){
+        auto status=m_asyncFuture.wait_for(std::chrono::milliseconds(0));
+        if(status==std::future_status::ready){
+            try{
+                int result=m_asyncFuture.get();
+                addLogSafe(QString("异步任务完成，结果: %1").arg(result));
+                m_errorLogLabel->setText("错误日志: 无");
+            }
+            catch(const std::exception& e){
+                addLogSafe(QString("异步任务错误: %1").arg(e.what()));
+                m_errorLogLabel->setText(QString("错误日志: %1").arg(e.what()));
+            }
+            m_isRunning = false;
+        }
+    }
 }
 
 void StdThreadWidget::singleThreadWork(int threadId, int workTime)
@@ -379,4 +402,38 @@ void StdThreadWidget::joinAllThreads()
         }
     }
     m_threads.clear();
+}
+
+void StdThreadWidget::startAsyncExtension()
+{
+    if(m_isRunning){
+        QMessageBox::warning(this, "警告", "已有任务在运行中，请先停止！");
+        return;
+    }
+
+    m_isRunning=true;
+    m_stopFlag = false;
+    m_errorLogLabel->setText("错误日志: 运行中...");
+
+    addLogSafe("=== 启动异步扩展演示 ===");
+
+    // 使用 std::async 启动异步任务（模拟可能抛出异常的工作）
+    m_asyncFuture=std::async(std::launch::async,[this]()->int{
+        int result=0;
+        for(int i=0;i<5;++i){
+            if(m_stopFlag){
+                throw std::runtime_error("任务被停止");
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            result+=i;
+        }
+        if(result%2==0){
+            throw std::runtime_error("模拟计算错误");
+        }
+        return result;
+    });
+
+    // 在定时器中检查 future 状态并处理结果/错误
+    // （注：实际中可扩展 updateUI() 来轮询 future.valid() 和 future.wait_for()）
+    addLogSafe("异步任务已启动");
 }
