@@ -7,6 +7,8 @@ add_library(ThreadingDemo
     threadingdemowidget.cpp
     mutexdemowidget.h
     mutexdemowidget.cpp
+    conditionvariablewidget.h
+    conditionvariablewidget.cpp
 )
 
 target_link_libraries(ThreadingDemo PRIVATE Qt5::Core Qt5::Widgets)

@@ -134,7 +134,6 @@ void ThreadingDemoWidget::initNavigationList()
     
     QListWidgetItem *conditionItem = new QListWidgetItem("condition_variable 演示");
     conditionItem->setData(Qt::UserRole, "condition");
-    //conditionItem->setEnabled(false); // 暂时禁用，待实现
     navigationList->addItem(conditionItem);
     
     // 默认选中第一项
@@ -217,9 +216,13 @@ void ThreadingDemoWidget::createDemoPages()
     threadDemo = new StdThreadWidget(this);
     contentStack->addWidget(threadDemo);
 
-    // 创建std::thread演示页面
+    // 创建std::mutex演示页面
     mutexDemo = new MutexDemoWidget(this);
     contentStack->addWidget(mutexDemo);
+
+    // 创建std::condition_variable演示页面
+    cvDemo = new ConditionVariableWidget(this);
+    contentStack->addWidget(cvDemo);
 }
 
 void ThreadingDemoWidget::initConnections()
@@ -255,6 +258,11 @@ void ThreadingDemoWidget::onNavigationSelectionChanged(QListWidgetItem *current,
     else if (demoType == "mutex") {
         if (mutexDemo) {
             contentStack->setCurrentWidget(mutexDemo);
+        }
+    }
+    else if (demoType == "condition") {
+        if (cvDemo) {
+            contentStack->setCurrentWidget(cvDemo);
         }
     }
     // 其他演示类型的处理可以在这里添加

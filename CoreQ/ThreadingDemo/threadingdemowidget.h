@@ -5,6 +5,7 @@
 #include "qpromise.h"
 #include "stdthreadwidget.h"
 #include "mutexdemowidget.h"
+#include "conditionvariablewidget.h"
 
 /**
  * @brief ThreadingDemoWidget类 - C++多线程技术演示主界面
@@ -87,6 +88,7 @@ private:
     QPromise *promiseDemo;          ///< Promise/Future演示页面
     StdThreadWidget *threadDemo;    ///< std::thread演示页面
      MutexDemoWidget *mutexDemo;      ///< std::mutex演示页面
+     ConditionVariableWidget *cvDemo; ///< std::condition_variable演示页面
      QWidget *welcomePage;            ///< 欢迎页面
     
     // 样式和布局
