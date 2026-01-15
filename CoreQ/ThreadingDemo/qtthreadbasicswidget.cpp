@@ -10,8 +10,12 @@ void Worker::doWork(const QString &parameter)
     QString result;
     // 模拟耗时操作 (5秒)
     for (int i = 1; i <= 5; ++i) {
-        // 检查线程是否请求中断 (仅在Qt5.2+ QThread::requestInterruption配合下有效，
-        // 但Worker模式通常通过标志位或析构控制，这里简单模拟)
+        // 检查线程是否请求中断
+        if (QThread::currentThread()->isInterruptionRequested()) {
+            emit resultReady("Worker: 检测到中断请求，提前结束任务");
+            break;
+        }
+
         QThread::msleep(500); 
         result = QString("步骤 %1 完成").arg(i);
         emit resultReady(QString("%1 -> %2").arg(parameter).arg(result));
@@ -141,9 +145,13 @@ void QtThreadBasicsWidget::stopWorker()
 
     logMessage("正在停止 Worker 线程...");
     
-    // 请求退出
+    // 1. 请求中断业务逻辑 (让 doWork 中的循环 break)
+    m_workerThread->requestInterruption();
+    
+    // 2. 请求退出事件循环
     m_workerThread->quit();
-    // 阻塞等待退出
+    
+    // 3. 阻塞等待退出
     m_workerThread->wait();
     
     // 指针置空（对象会在deleteLater中删除，但指针本身变成悬空指针，所以要置空）
