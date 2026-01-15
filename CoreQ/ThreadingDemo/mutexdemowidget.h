@@ -11,7 +11,9 @@
 #include <QTimer>
 #include <QSpinBox>
 #include <QGroupBox>
-
+#include<QMutex>
+#include<QWaitCondition>
+#include<QThread>
 /**
  * MutexDemoWidget - std::mutex 演示界面（仅UI与占位逻辑）
  * 
@@ -41,6 +43,8 @@ private slots:
     void clearLog();
     void updateUI();
 
+    void startQtMutexDemo();
+    
 private:
     void initUI();
     void addLogUnsafe(const QString& msg);
@@ -71,6 +75,18 @@ private:
     QLabel* m_statusLabel{};
     QTextEdit* m_logDisplay{};
 
+    //UI扩展
+    QPushButton* m_startQtMutexBtn;
+    QProgressBar* m_atomicProgress;
+    QLabel* m_comparisonLabel;
+
+    //Qt线程管理
+    QThread* m_producerThread;
+    QThread* m_consumerThread;
+    QMutex m_qMutex;
+    QWaitCondition m_qWaitCond;
+    std::atomic<int> m_atomicCount;
+    
     QTimer* m_updateTimer{};
     QString m_pendingLogs;
     bool m_isRunning{false};

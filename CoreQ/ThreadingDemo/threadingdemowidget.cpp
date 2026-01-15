@@ -1,5 +1,12 @@
 #include "threadingdemowidget.h"
 #include <QApplication>
+#include "qtthreadbasicswidget.h"
+#include "qtconcurrentwidget.h"
+#include "qtproducerconsumerwidget.h"
+#include "qtreaderswriterswidget.h"
+#include "qtparallelmapwidget.h"
+#include "qtpipelinewidget.h"
+#include "qtdiningphilosopherswidget.h"
 
 ThreadingDemoWidget::ThreadingDemoWidget(QWidget *parent)
     : QWidget(parent)
@@ -111,33 +118,91 @@ void ThreadingDemoWidget::setupUI()
 
 void ThreadingDemoWidget::initNavigationList()
 {
-    // 添加导航项目
+    // 清空列表
+    navigationList->clear();
+
+    // ==========================================
+    // C++11 Std 线程库
+    // ==========================================
+    QListWidgetItem *headerStd = new QListWidgetItem("=== C++11 Std 线程库 ===");
+    headerStd->setFlags(Qt::NoItemFlags); // 不可选中
+    headerStd->setBackground(QColor("#ecf0f1"));
+    headerStd->setForeground(QColor("#7f8c8d"));
+    headerStd->setTextAlignment(Qt::AlignCenter);
+    navigationList->addItem(headerStd);
+
+    // 添加原有导航项目
     QListWidgetItem *welcomeItem = new QListWidgetItem("欢迎页面");
     welcomeItem->setData(Qt::UserRole, "welcome");
-    welcomeItem->setIcon(QIcon(":/icons/home.png")); // 如果有图标资源
+    welcomeItem->setIcon(QIcon(":/icons/home.png")); 
     navigationList->addItem(welcomeItem);
     
     QListWidgetItem *promiseItem = new QListWidgetItem("Promise/Future 演示");
     promiseItem->setData(Qt::UserRole, "promise");
-    promiseItem->setIcon(QIcon(":/icons/async.png")); // 如果有图标资源
     navigationList->addItem(promiseItem);
     
-    // 预留更多演示项目
     QListWidgetItem *threadItem = new QListWidgetItem("std::thread 演示");
     threadItem->setData(Qt::UserRole, "thread");
     navigationList->addItem(threadItem);
     
     QListWidgetItem *mutexItem = new QListWidgetItem("std::mutex 演示");
     mutexItem->setData(Qt::UserRole, "mutex");
-    //mutexItem->setEnabled(false); // 暂时禁用，待实现
     navigationList->addItem(mutexItem);
     
     QListWidgetItem *conditionItem = new QListWidgetItem("condition_variable 演示");
     conditionItem->setData(Qt::UserRole, "condition");
     navigationList->addItem(conditionItem);
+
+    // ==========================================
+    // Qt 线程基础
+    // ==========================================
+    QListWidgetItem *headerQtBasic = new QListWidgetItem("=== Qt 线程基础 ===");
+    headerQtBasic->setFlags(Qt::NoItemFlags);
+    headerQtBasic->setBackground(QColor("#ecf0f1"));
+    headerQtBasic->setForeground(QColor("#7f8c8d"));
+    headerQtBasic->setTextAlignment(Qt::AlignCenter);
+    navigationList->addItem(headerQtBasic);
+
+    QListWidgetItem *basicsItem = new QListWidgetItem("线程管理与生命周期");
+    basicsItem->setData(Qt::UserRole, "qt_basics");
+    navigationList->addItem(basicsItem);
+
+    QListWidgetItem *concurrentItem = new QListWidgetItem("高级并发 (QtConcurrent)");
+    concurrentItem->setData(Qt::UserRole, "qt_concurrent");
+    navigationList->addItem(concurrentItem);
+
+    // ==========================================
+    // 经典并发模型
+    // ==========================================
+    QListWidgetItem *headerModels = new QListWidgetItem("=== 经典并发模型 ===");
+    headerModels->setFlags(Qt::NoItemFlags);
+    headerModels->setBackground(QColor("#ecf0f1"));
+    headerModels->setForeground(QColor("#7f8c8d"));
+    headerModels->setTextAlignment(Qt::AlignCenter);
+    navigationList->addItem(headerModels);
+
+    QListWidgetItem *pcItem = new QListWidgetItem("生产者-消费者模型");
+    pcItem->setData(Qt::UserRole, "qt_pc");
+    navigationList->addItem(pcItem);
+
+    QListWidgetItem *rwItem = new QListWidgetItem("读写者模型");
+    rwItem->setData(Qt::UserRole, "qt_rw");
+    navigationList->addItem(rwItem);
+
+    QListWidgetItem *mapItem = new QListWidgetItem("并行计算 (Map-Reduce)");
+    mapItem->setData(Qt::UserRole, "qt_map");
+    navigationList->addItem(mapItem);
+    
+    QListWidgetItem *pipelineItem = new QListWidgetItem("流水线模型");
+    pipelineItem->setData(Qt::UserRole, "qt_pipeline");
+    navigationList->addItem(pipelineItem);
+
+    QListWidgetItem *diningItem = new QListWidgetItem("哲学家就餐 (死锁)");
+    diningItem->setData(Qt::UserRole, "qt_dining");
+    navigationList->addItem(diningItem);
     
     // 默认选中第一项
-    navigationList->setCurrentRow(0);
+    navigationList->setCurrentRow(1); // 选中欢迎页面 (index 0 是header)
 }
 
 void ThreadingDemoWidget::createDemoPages()
@@ -223,6 +288,31 @@ void ThreadingDemoWidget::createDemoPages()
     // 创建std::condition_variable演示页面
     cvDemo = new ConditionVariableWidget(this);
     contentStack->addWidget(cvDemo);
+
+    // ==========================================
+    // 新增 Qt 多线程演示页面
+    // ==========================================
+    
+    // 5. Qt 线程基础
+    contentStack->addWidget(new QtThreadBasicsWidget(this));
+    
+    // 6. Qt Concurrent
+    contentStack->addWidget(new QtConcurrentWidget(this));
+    
+    // 7. 生产者-消费者
+    contentStack->addWidget(new QtProducerConsumerWidget(this));
+    
+    // 8. 读写锁
+    contentStack->addWidget(new QtReadersWritersWidget(this));
+    
+    // 9. 并行 Map
+    contentStack->addWidget(new QtParallelMapWidget(this));
+    
+    // 10. 流水线
+    contentStack->addWidget(new QtPipelineWidget(this));
+    
+    // 11. 哲学家就餐
+    contentStack->addWidget(new QtDiningPhilosophersWidget(this));
 }
 
 void ThreadingDemoWidget::initConnections()
@@ -264,6 +354,27 @@ void ThreadingDemoWidget::onNavigationSelectionChanged(QListWidgetItem *current,
         if (cvDemo) {
             contentStack->setCurrentWidget(cvDemo);
         }
+    }
+    else if (demoType == "qt_basics") {
+        contentStack->setCurrentIndex(5);
+    }
+    else if (demoType == "qt_concurrent") {
+        contentStack->setCurrentIndex(6);
+    }
+    else if (demoType == "qt_pc") {
+        contentStack->setCurrentIndex(7);
+    }
+    else if (demoType == "qt_rw") {
+        contentStack->setCurrentIndex(8);
+    }
+    else if (demoType == "qt_map") {
+        contentStack->setCurrentIndex(9);
+    }
+    else if (demoType == "qt_pipeline") {
+        contentStack->setCurrentIndex(10);
+    }
+    else if (demoType == "qt_dining") {
+        contentStack->setCurrentIndex(11);
     }
     // 其他演示类型的处理可以在这里添加
 }

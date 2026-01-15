@@ -46,7 +46,10 @@ void MutexDemoWidget::initUI()
     counterLayout->addWidget(m_startUnlockedBtn);
     counterLayout->addWidget(m_startMutexBtn);
     counterLayout->addWidget(m_startAtomicBtn);
-    counterLayout->addStretch();
+    //counterLayout->addStretch();
+    // Qt 互斥演示按钮（添加到 m_counterGroup 的布局中）
+    m_startQtMutexBtn = new QPushButton("使用Qt互斥执行");
+    counterLayout->addWidget(m_startQtMutexBtn);
 
     // 读者-写者演示组
     m_rwGroup = new QGroupBox("读者-写者演示", this);
@@ -92,6 +95,14 @@ void MutexDemoWidget::initUI()
     statusLayout->addWidget(m_statusLabel);
     statusLayout->addWidget(m_progressBar);
 
+    // 原子进度条（添加到 m_counterGroup 的布局中）
+    m_atomicProgress = new QProgressBar();
+    m_atomicProgress->setVisible(false);
+    statusLayout->addWidget(m_atomicProgress);
+    // 比较标签（添加到 m_counterGroup 的布局中）
+    m_comparisonLabel = new QLabel("性能对比：无");
+    statusLayout->addWidget(m_comparisonLabel);
+
     m_logDisplay = new QTextEdit();
     m_logDisplay->setReadOnly(true);
     m_logDisplay->setMaximumHeight(220);
@@ -112,7 +123,7 @@ void MutexDemoWidget::initUI()
     connect(m_startDeadlockBtn,&QPushButton::clicked, this, &MutexDemoWidget::startDeadlockDemo);
     connect(m_stopBtn,         &QPushButton::clicked, this, &MutexDemoWidget::stopAll);
     connect(m_clearBtn,        &QPushButton::clicked, this, &MutexDemoWidget::clearLog);
-
+    connect(m_startQtMutexBtn, &QPushButton::clicked, this, &MutexDemoWidget::startQtMutexDemo);
     // 简单样式
     setStyleSheet(R"(
         QGroupBox { font-weight: bold; border: 2px solid #cccccc; border-radius: 5px; margin-top: 1ex; padding-top: 10px; }
@@ -618,6 +629,17 @@ void MutexDemoWidget::stopAll()
     m_startAtomicBtn->setEnabled(true);
     m_startRWBtn->setEnabled(true);
     m_startDeadlockBtn->setEnabled(true);
+    m_stopRequested = true;
+    if(m_producerThread)
+    {
+        m_producerThread->quit();
+        m_producerThread->wait();
+    }
+    if(m_consumerThread)
+    {
+        m_consumerThread->quit();
+        m_consumerThread->wait();
+    }
     addLogUnsafe("停止：所有占位演示。");
 }
 
@@ -642,6 +664,63 @@ void MutexDemoWidget::addLogUnsafe(const QString& msg)
     m_pendingLogs += QString("[%1] %2\n").arg(ts, msg);
 }
 
+void MutexDemoWidget::startQtMutexDemo()
+{
+    if (m_isRunning) return;
+    m_isRunning = true;
+    m_stopRequested = false;
+    addLogUnsafe("=== 启动 Qt 互斥演示 ===");
+    
+    m_atomicCount =0;
+    m_atomicProgress->setVisible(true);
+    m_atomicProgress->setRange(0, m_iterations->value());
+
+    m_producerThread=new QThread();
+    m_consumerThread=new QThread();
+    connect(m_producerThread,&QThread::started,[this](){
+        for(int i=0;i< m_iterations->value();i++)
+        {
+            QMutexLocker locker(&m_qMutex);
+            m_qWaitCond.wakeOne();
+            QMetaObject::invokeMethod(this, [this, i] {
+                addLogUnsafe(QString("=== Qt 生产者 :%1===").arg(i));
+                }, Qt::QueuedConnection);           
+        }
+    });
+    connect(m_consumerThread,&QThread::started,[this](){
+        for(int i=0;i<m_iterations->value();i++)
+        {
+            QMutexLocker locker(&m_qMutex);
+            m_qWaitCond.wait(&m_qMutex);
+            QMetaObject::invokeMethod(this, [this, i] {
+                addLogUnsafe(QString("=== Qt 消费者 :%1===").arg(i));
+                }, Qt::QueuedConnection);
+        }
+    });
+
+    m_producerThread->start();
+    m_consumerThread->start();
+
+    QThread *atomicThread=new QThread();
+    connect(atomicThread,&QThread::started,[this](){
+        auto start=std::chrono::high_resolution_clock::now();
+        for(int i=0;i<m_iterations->value();i++)
+        {
+            m_atomicCount.fetch_add(1,std::memory_order_relaxed);
+            QMetaObject::invokeMethod(this, [this,i] {
+                m_atomicProgress->setValue(i+1);
+            }, Qt::QueuedConnection);
+        }
+        auto end=std::chrono::high_resolution_clock::now();
+        auto duration=std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        QMetaObject::invokeMethod(this, [this,duration] {
+            addLogUnsafe(QString("=== Qt 原子操作耗时：%1 毫秒 ===").arg(duration));
+        }, Qt::QueuedConnection);
+    });
+    atomicThread->start();
+
+    addLogUnsafe("=== Qt 互斥演示已启动 ===");
+}
 
 //QT的线程同步、C++官方的线程同步方式
 //QT时间循环、使用信号量进行同步等待，

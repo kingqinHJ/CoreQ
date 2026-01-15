@@ -1,3 +1,5 @@
+find_package(Qt5 REQUIRED COMPONENTS Concurrent)
+
 add_library(ThreadingDemo
     qpromise.h
     qpromise.cpp
@@ -9,9 +11,23 @@ add_library(ThreadingDemo
     mutexdemowidget.cpp
     conditionvariablewidget.h
     conditionvariablewidget.cpp
+    qtthreadbasicswidget.h
+    qtthreadbasicswidget.cpp
+    qtconcurrentwidget.h
+    qtconcurrentwidget.cpp
+    qtproducerconsumerwidget.h
+    qtproducerconsumerwidget.cpp
+    qtreaderswriterswidget.h
+    qtreaderswriterswidget.cpp
+    qtparallelmapwidget.h
+    qtparallelmapwidget.cpp
+    qtpipelinewidget.h
+    qtpipelinewidget.cpp
+    qtdiningphilosopherswidget.h
+    qtdiningphilosopherswidget.cpp
 )
 
-target_link_libraries(ThreadingDemo PRIVATE Qt5::Core Qt5::Widgets)
+target_link_libraries(ThreadingDemo PRIVATE Qt5::Core Qt5::Widgets Qt5::Concurrent)
 target_include_directories(ThreadingDemo INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(MSVC)
