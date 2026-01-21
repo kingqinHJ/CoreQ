@@ -193,7 +193,9 @@ void QtThreadBasicsWidget::startSubclassThread()
 
     m_subclassThread = new MyThread(this);
     connect(m_subclassThread, &MyThread::resultReady, this, &QtThreadBasicsWidget::handleSubclassResult);
-    connect(m_subclassThread, &QThread::finished, [this](){
+    
+    // 注意：必须传入 this 作为上下文，确保 Lambda 在主线程执行，且随 Widget 销毁自动断开
+    connect(m_subclassThread, &QThread::finished, this, [this](){
         logMessage("子类化线程已结束");
         m_btnStartSubclass->setEnabled(true);
     });
