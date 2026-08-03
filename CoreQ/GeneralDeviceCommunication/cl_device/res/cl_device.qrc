@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/cl_device">
+        <file>Creality_Falcon_A1.png</file>
+        <file>Creality_Falcon_A1_Pro.png</file>
+        <file>Creality_Falcon_T1.png</file>
+        <file>Creality_Falcon2.png</file>
+        <file>Creality_Falcon2_Pro.png</file>
+        <file>Creality_Falcon2_Pro_S.png</file>
+        <file>CR-Laser_Falcon.png</file>
+        <file>CR-Laser_Falcon_Pro.png</file>
+        <file>CV01_PRO.png</file>
+        <file>Creality_Falcon_A1C.png</file>
+        <file>guide/Creality_Falcon_A1.png</file>
+        <file>guide/Creality_Falcon_T1.png</file>
+        <file>guide/Creality_Falcon_T1C.png</file>
+        <file>guide/Creality_Falcon2.png</file>
+        <file>guide/CR-Laser_Falcon.png</file>
+        <file>guide/Creality_Falcon_A1C.png</file>
+    </qresource>
+</RCC>
