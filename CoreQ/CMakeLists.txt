@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
 )
 
 add_subdirectory(DesignPatternsPrinciples)
+add_subdirectory(DesignPatterns)
 add_subdirectory(DataProcess)
 add_subdirectory(ModernCpp)
 add_subdirectory(ThreadingDemo)
@@ -70,11 +71,12 @@ target_link_libraries(CoreQ PRIVATE
     spdlog::spdlog
 )
 
-target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DataProcess ModernCpp ThreadingDemo MVxDemo)
+target_link_libraries(CoreQ PUBLIC DesignPatternsPrinciples DesignPatterns DataProcess ModernCpp ThreadingDemo MVxDemo)
 
 target_include_directories(CoreQ PUBLIC
                           "${PROJECT_BINARY_DIR}"
                           "${PROJECT_SOURCE_DIR}/DesignPatternsPrinciples"
+                          "${PROJECT_SOURCE_DIR}/DesignPatterns"
                           "${PROJECT_SOURCE_DIR}/DataProcess"
                           "${PROJECT_SOURCE_DIR}/ModernCpp"
                           "${PROJECT_SOURCE_DIR}/ThreadingDemo"

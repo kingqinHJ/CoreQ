@@ -12,6 +12,7 @@
 #include "MVxDemo/mvpwidget.h"
 #include "MVxDemo/mvvmwidget.h"
 #include "MVxDemo/mvxdemowidget.h"
+#include "DesignPatterns/designpatternswidget.h"
 
 class PageFactory{
 public:
@@ -25,6 +26,7 @@ public:
         if (type == "ModernCpp") return new ModernCppWidget(parent);
         if (type == "ThreadingDemo") return new ThreadingDemoWidget(parent);
         if (type == "MVxDemo") return new MVxDemoWidget(parent);
+        if (type == "DesignPatterns") return new DesignPatternsWidget(parent);
         return nullptr;
     }
 };
