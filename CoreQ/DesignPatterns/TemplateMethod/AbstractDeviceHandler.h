@@ -1,72 +1,65 @@
 #ifndef ABSTRACTDEVICEHANDLER_H
 #define ABSTRACTDEVICEHANDLER_H
 
-#include <QObject>
 #include <QVariantMap>
 #include <QVector>
-#include <functional>
 #include <QString>
+#include <functional>
 #include "CommonInfo.h"
 #include "HandlerCallbacks.h"
 
-class AbstractDeviceHandler : public QObject
+class AbstractDeviceHandler
 {
-    Q_OBJECT
 public:
-    explicit AbstractDeviceHandler(HandlerCallbacks callbacks);
-    virtual ~AbstractDeviceHandler()=default;
-    
-    //模板方法
+    explicit AbstractDeviceHandler(HandlerCallbacks cb);
+    virtual ~AbstractDeviceHandler() = default;
+
+    // ===== 模板方法（public 入口，非 virtual）=====
     void startRefresh();
-    void stopUpload();
-    void reset();
+    void startUpload();
+    virtual void reset();
 
-    //设备信息
-    virtual QString deviceName() const=0;
+    // ===== 设备信息 =====
+    virtual QString deviceName() const = 0;
 
-    const CommonInfo& commonInfo() const=0;
-    virtual QVariantMap deviceSpecificInfo() const=
-    /// 构造函数
-    AbstractDeviceHandler(QObject* parent = nullptr);
+    // ===== 数据访问（供 UI 读取）=====
+    const CommonInfo& commonInfo() const { return m_common; }
+    virtual QVariantMap deviceSpecificInfo() const { return {}; }
+    virtual QVariantMap deviceSpecificTitles() const { return {}; }
 
-    QObject* context = nullptr;
-
-    std::function<void(const QString& log)> logMessage;
-
-    std::function<void(bool ok)> onFinish;
-
-    std::function<void()> onDataChanged;
+    bool isBusy() const { return m_busy; }
 
 protected:
-    / ===== 步骤函数指针类型（成员函数指针）=====
-    using StenFn = void(AbstractDeviceHandler::*)();
+    // ===== 步骤函数指针类型（成员函数指针）=====
+    using StepFn = void (AbstractDeviceHandler::*)();
 
     // ===== 异步推进引擎（基类实现，子类不覆盖）=====
-    void executeStep(const QVector<StenFn>& steps);
+    void executeSteps(const QVector<StepFn>& steps);
     void advance();
-    void completeStep(bool ok,const QString &msg);
-    void asyncDelay(int ms,std::function<void()> action);
+    void completeStep(bool ok, const QString& msg);
+    void asyncDelay(int ms, std::function<void()> action);
 
-    // ===== 【具体步骤】公共步骤：基类实现，所有设备共享 =====
+    // ===== 【具体步骤】公共步骤：基类实现，所有设备共享（不允许覆盖）=====
     void step_checkConnection();
-    void step_checkPrerequisites();
-
 
     // ===== 【纯虚步骤】设备特定：子类必须实现 =====
-    virtual void step_readDeviceInfo()=0;
-    virtual void step_doDeviceAction()=0;
-    virtual void step_upload_execute()=0;
+    virtual void step_readDeviceInfo() = 0;
+    virtual void step_doDeviceAction() = 0;
+    virtual void step_upload_execute() = 0;
 
     // ===== 【钩子方法】基类默认实现，子类可选覆盖 =====
-    virtual void step_validateData()=0;
-    virtual void step_postProcess()=0;
-    virtual void step_upload_prepare()=0;
+    virtual void step_checkPrerequisites();
+    virtual void step_validateData();
+    virtual void hook_postProcess();
+    virtual void step_upload_prepare();
 
     HandlerCallbacks m_cb;
     CommonInfo m_common;
+
 private:
-    QVector<StenFn> m_currentSteps;
-    int m_stepIndex=0;
-    bool m_busy=false;
+    QVector<StepFn> m_currentSteps;
+    int m_stepIndex = 0;
+    bool m_busy = false;
 };
+
 #endif // ABSTRACTDEVICEHANDLER_H

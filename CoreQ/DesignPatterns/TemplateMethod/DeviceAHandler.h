@@ -7,30 +7,27 @@ struct DeviceAState
 {
     bool calibrated = false;
     int calibrationValue = 0;
-    QString mode="normal";
-}
+    QString mode = QStringLiteral("标准模式");
+};
 
 class DeviceAHandler : public AbstractDeviceHandler
 {
 public:
     using AbstractDeviceHandler::AbstractDeviceHandler;
-    DeviceAHandler(QObject* parent = nullptr);
-    ~DeviceAHandler() override;
+    ~DeviceAHandler() override = default;
 
-    QString deviceName() const override ;
+    QString deviceName() const override;
     QVariantMap deviceSpecificInfo() const override;
-    QVariantMap deviceSpecificTitle() const override;
-
+    QVariantMap deviceSpecificTitles() const override;
     void reset() override;
 
 protected:
-    void step_readCalibrationValue() override;
+    void step_readDeviceInfo() override;
     void step_doDeviceAction() override;
     void step_upload_execute() override;
-
-    void executeSteps() override;
 
 private:
     DeviceAState m_state;
 };
-#endif
+
+#endif // DEVICEAHANDLER_H

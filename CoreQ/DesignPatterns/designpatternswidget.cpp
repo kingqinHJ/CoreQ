@@ -1,4 +1,5 @@
 #include "designpatternswidget.h"
+#include "TemplateMethod/templatemethodwidget.h"
 
 #include <QTabWidget>
 #include <QLabel>
@@ -11,7 +12,8 @@ DesignPatternsWidget::DesignPatternsWidget(QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(tabs);
 
-    // 后续各设计模式示例页在此通过 tabs->addTab(...) 添加
     tabs->addTab(new QLabel(QStringLiteral("设计模式示例（待补充）"), this),
                  QStringLiteral("概览"));
+    tabs->addTab(new TemplateMethodWidget(this),
+                 QStringLiteral("模板方法模式"));
 }

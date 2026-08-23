@@ -1,4 +1,4 @@
-ifndef COMMONINFO_H
+#ifndef COMMONINFO_H
 #define COMMONINFO_H
 
 #include <QString>
